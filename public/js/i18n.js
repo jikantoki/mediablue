@@ -8,7 +8,7 @@ const I18N_DATA = {
   ja: {
     // App & Brand
     app_title: 'Mediablue - A2DP Sink クライアント',
-    brand_name: 'エノキ電気 ENOKI ELECTRONICS',
+    brand_name: 'Mediablue',
     brand_sub: 'Mediablue',
 
     // Navigation
@@ -84,8 +84,8 @@ const I18N_DATA = {
 
     // About Page
     about_heading: 'アプリケーション情報',
-    about_hero_tag: 'ENOKI ELECTRONICS - AUTOMOTIVE SOLUTIONS',
-    about_title: 'エノキ電気 A2DP Sink クライアント',
+    about_hero_tag: 'Mediablue - AUTOMOTIVE SOLUTIONS',
+    about_title: 'Mediablue - A2DP Sink クライアント',
     about_subtitle: '車載向け 高品位 Bluetooth オーディオ受信システム',
     about_desc_title: '製品概要',
     about_desc_body:

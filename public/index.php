@@ -333,8 +333,8 @@ $isMock = \mediablue\Config::isMockMode();
                     <div class="about-layout">
                         <!-- Hero Banner -->
                         <div class="card about-hero-card">
-                            <span class="about-brand-tag" data-i18n="about_hero_tag">ENOKI ELECTRONICS - AUTOMOTIVE SOLUTIONS</span>
-                            <h1 class="about-title" data-i18n="about_title">エノキ電気 A2DP Sink クライアント</h1>
+                            <span class="about-brand-tag" data-i18n="about_hero_tag">Mediablue - AUTOMOTIVE SOLUTIONS</span>
+                            <h1 class="about-title" data-i18n="about_title">Mediablue - A2DP Sink クライアント</h1>
                             <p class="about-subtitle" data-i18n="about_subtitle">車載向け 高品位 Bluetooth オーディオ受信システム</p>
                         </div>
 
