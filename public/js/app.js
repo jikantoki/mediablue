@@ -20,10 +20,10 @@ const App = {
     // 最初のデータロード
     this.refreshAll()
 
-    // 2秒ごとに自動更新（再生位置、Bluetooth接続、通話ステータス）
+    // 1秒ごとに自動更新（再生位置、アクティブメディアプレイヤーの追従、通話ステータス）
     this.pollingInterval = setInterval(() => {
       this.pollFast()
-    }, 2000)
+    }, 1000)
 
     // 10秒ごとの低頻度更新（デバイス一覧など）
     setInterval(() => {

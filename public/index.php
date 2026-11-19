@@ -186,6 +186,7 @@ $isMock = \mediablue\Config::isMockMode();
                             <div class="codec-tag-wrapper">
                                 <span class="badge badge-profile">A2DP Sink</span>
                                 <span id="player-codec" class="badge badge-codec">AAC 256kbps</span>
+                                <span id="player-app-badge" class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--color-green); border: 1px solid rgba(16, 185, 129, 0.4); display: none;">App</span>
                                 <span id="player-source-dev" class="source-device-name">Ken's iPhone 15 Pro</span>
                             </div>
 

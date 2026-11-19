@@ -50,6 +50,17 @@ const Player = {
     document.getElementById('track-album').textContent = p.album || ''
     document.getElementById('player-codec').textContent = p.codec || 'A2DP'
 
+    // アプリ名バッジの表示 (Spotify, Apple Music, YouTube 等)
+    const appBadge = document.getElementById('player-app-badge')
+    if (appBadge) {
+      if (p.app_name) {
+        appBadge.textContent = p.app_name
+        appBadge.style.display = 'inline-block'
+      } else {
+        appBadge.style.display = 'none'
+      }
+    }
+
     // Play/Pause icon & animation
     this.isPlaying = p.status === 'playing'
     const iconPlay = document.getElementById('icon-play')
