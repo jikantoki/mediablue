@@ -93,9 +93,12 @@ const Player = {
       if (data.success) {
         this.refresh()
       } else {
-        App.toast('AVRCP control failed: ' + (data.error || 'Unknown error'))
+        const errMsg = data.error || 'Control failed'
+        console.warn('AVRCP Error:', data)
+        App.toast('AVRCP: ' + errMsg)
       }
     } catch (e) {
+      console.error('AVRCP request error:', e)
       App.toast('Failed to send control command')
     }
   },

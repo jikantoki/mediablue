@@ -133,6 +133,12 @@ const App = {
         document.getElementById('diag-dbus').textContent = s.has_dbus_socket
           ? 'Available (/var/run/dbus/system_bus_socket) ✅'
           : 'Not Found (Check Docker Mount)'
+        document.getElementById('diag-bluez-dbus').textContent = s.bluez_dbus_connected
+          ? 'Connected (org.bluez OK) ✅'
+          : 'Failed / Unreachable ❌'
+        document.getElementById('diag-media-player').textContent = s.media_player_path
+          ? `Found (${s.media_player_path}) ✅`
+          : 'Not Detected (Connect phone & open music app)'
         document.getElementById('diag-pulse-server').textContent =
           s.pulse_server
       }

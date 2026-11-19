@@ -15,6 +15,17 @@ class SystemController
         $hasPlayerctl = CommandRunner::hasCommand('playerctl');
         $hasWpctl = CommandRunner::hasCommand('wpctl');
         $hasDbusSocket = file_exists('/var/run/dbus/system_bus_socket');
+        
+        // BlueZ D-Bus Ping テスト
+        $bluezDbusOk = false;
+        if ($hasDbusSocket) {
+            $pingRes = CommandRunner::run("dbus-send --system --print-reply --dest=org.bluez / org.freedesktop.DBus.Peer.Ping 2>/dev/null");
+            $bluezDbusOk = $pingRes['success'];
+        }
+
+        // MediaPlayer1 オブジェクトの検出テスト
+        $mediaService = new \mediablue\Services\MediaService();
+        $mediaPlayerPath = $mediaService->findMediaPlayerPath();
 
         Response::success([
             'system' => [
@@ -26,6 +37,8 @@ class SystemController
                 'has_playerctl' => $hasPlayerctl,
                 'has_wpctl' => $hasWpctl,
                 'has_dbus_socket' => $hasDbusSocket,
+                'bluez_dbus_connected' => $bluezDbusOk,
+                'media_player_path' => $mediaPlayerPath,
                 'pulse_server' => Config::getPulseServer(),
                 'server_time' => date('Y-m-d H:i:s'),
                 'uptime' => @file_get_contents('/proc/uptime') ? strtok(file_get_contents('/proc/uptime'), ' ') : 'N/A',

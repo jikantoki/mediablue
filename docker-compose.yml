@@ -7,21 +7,24 @@ services:
       dockerfile: Dockerfile
     container_name: mediablue-app
     restart: unless-stopped
-    # ホストのBluetoothスタックおよびネットワークと直結するために host ネットワークを推奨
+    # ホストのBluetoothスタックおよびネットワークと直結するために host ネットワークを使用
     network_mode: 'host'
     # Bluetoothアダプタの操作やD-Bus通信のための権限
     privileged: true
     environment:
       - MOCK_MODE=false
+      - RUN_AS_ROOT=true
       - PULSE_SERVER=unix:/run/user/1000/pulse/native
-      # PipeWireの場合: unix:/run/user/1000/pipewire-0 も利用可能
+      - DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
     volumes:
-      # ホストのD-Busシステムソケット（BlueZ / bluetoothctl の通信に必須）
-      - /var/run/dbus:/var/run/dbus:ro
-      # ホストのPulseAudio / PipeWire-pulse ソケット（オーディオ再生・HFPマイク入力に必須）
-      - /run/user/1000/pulse:/run/user/1000/pulse:ro
-      # PipeWireネイティブソケット（PipeWire環境の場合）
-      - /run/user/1000/pipewire-0:/run/user/1000/pipewire-0:ro
+      # ホストのD-Busシステムソケット（BlueZ / bluetoothctl / dbus-send の通信に必須・読み書き可能）
+      - /var/run/dbus:/var/run/dbus
+      # ホストのD-Busユーザーセッションバス（playerctl / WirePlumber用）
+      - /run/user/1000/bus:/run/user/1000/bus
+      # ホストのPulseAudio / PipeWire-pulse ソケット（オーディオ再生・HFPマイク入力用）
+      - /run/user/1000/pulse:/run/user/1000/pulse
+      # PipeWireネイティブソケット
+      - /run/user/1000/pipewire-0:/run/user/1000/pipewire-0
       # PulseAudioのクッキー（認証が必要な場合）
       - /home/user/.config/pulse/cookie:/root/.config/pulse/cookie:ro
       # ソースコードをマウントして開発・ホットリロードしたい場合（任意）

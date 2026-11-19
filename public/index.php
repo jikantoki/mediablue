@@ -527,6 +527,14 @@ $isMock = \mediablue\Config::isMockMode();
                                         <td id="diag-dbus">-</td>
                                     </tr>
                                     <tr>
+                                        <td>BlueZ D-Bus Service</td>
+                                        <td id="diag-bluez-dbus">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>BlueZ MediaPlayer1 (AVRCP)</td>
+                                        <td id="diag-media-player">-</td>
+                                    </tr>
+                                    <tr>
                                         <td>PULSE_SERVER</td>
                                         <td id="diag-pulse-server">-</td>
                                     </tr>

@@ -270,8 +270,17 @@ docker compose -f docker-compose.dev.yml up -d --build
 
 ### Q3. コンテナログで `Failed to connect to system bus` と出る
 
-- ホストのD-Busソケットがマウントされているか確認してください（`docker-compose.yml` 内の `/var/run/dbus:/var/run/dbus:ro`）。
+- ホストのD-Busソケットがマウントされているか確認してください（`docker-compose.yml` 内の `/var/run/dbus:/var/run/dbus`）。
 - Ubuntuホストで `systemctl status dbus` がアクティブであることを確認してください。
+
+### Q4. 「AVRCP control failed」エラーが出る
+
+- **スマートフォン側で音楽アプリ（Spotify, Apple Music, YouTube等）が起動して曲が再生待機状態になっているか確認してください**:
+  - スマートフォンが接続されていても、スマホ側で一度も音楽アプリが起動していない場合、BlueZの `MediaPlayer1` オブジェクトが生成されずAVRCPコマンドを受け付けない場合があります。
+- **「Settings」タブの「BlueZ MediaPlayer1 (AVRCP)」を確認してください**:
+  - `Found (/org/bluez/hci0/dev_.../player0) ✅` と表示されていれば、D-Bus直通でAVRCP制御（Play/Pause/Next/Prev）が可能です。
+- **D-Busソケットの書き込み権限**:
+  - `docker-compose.yml` で `/var/run/dbus:/var/run/dbus`（読み書き可能）でマウントされているか確認してください。
 
 ---
 
