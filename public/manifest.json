@@ -1,7 +1,7 @@
 {
-  "name": "mediablue - A2DP & HFP In-Vehicle Infotainment",
-  "short_name": "mediablue",
-  "description": "Ubuntu & BlueZ Bluetooth A2DP Sink & HFP Hands-Free Web Client",
+  "name": "A2DP Sink - ENOKI ELECTRONICS",
+  "short_name": "A2DP Sink",
+  "description": "エノキ電気 (ENOKI ELECTRONICS) 車載 A2DP Sink クライアントアプリ",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -51,17 +51,17 @@
       "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Hands-Free Phone",
-      "short_name": "Phone",
-      "description": "Open HFP Hands-Free Dialer",
-      "url": "/#tab-phone",
+      "name": "Settings",
+      "short_name": "Settings",
+      "description": "Open System & Language Settings",
+      "url": "/#tab-settings",
       "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Bluetooth Manager",
-      "short_name": "Bluetooth",
-      "description": "Scan and pair Bluetooth devices",
-      "url": "/#tab-bluetooth",
+      "name": "About",
+      "short_name": "About",
+      "description": "About ENOKI ELECTRONICS A2DP Sink Client",
+      "url": "/#tab-about",
       "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }]
     }
   ]

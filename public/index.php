@@ -42,7 +42,7 @@ $isMock = \mediablue\Config::isMockMode();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>mediablue - A2DP Sink & HFP Client</title>
+    <title data-i18n="app_title">A2DP Sink クライアント - エノキ電気 ENOKI ELECTRONICS</title>
     
     <!-- PWA Settings -->
     <link rel="manifest" href="/manifest.json">
@@ -50,7 +50,7 @@ $isMock = \mediablue\Config::isMockMode();
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="mediablue">
+    <meta name="apple-mobile-web-app-title" content="A2DP Sink">
     <link rel="apple-touch-icon" href="/assets/icon-192.png">
     <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
     <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
@@ -69,13 +69,13 @@ $isMock = \mediablue\Config::isMockMode();
                         <path d="M9 17h6"/>
                         <circle cx="17" cy="17" r="2"/>
                     </svg>
-                    mediablue OS
+                    <span data-i18n="brand_name">エノキ電気 ENOKI ELECTRONICS</span>
                 </span>
                 <span id="mode-badge" class="badge <?= $isMock ? 'badge-mock' : 'badge-real' ?>">
-                    <?= $isMock ? 'SIMULATION MODE' : 'LIVE HOST MODE' ?>
+                    <?= $isMock ? 'シミュレーションモード' : '実機ホストモード' ?>
                 </span>
                 <button id="btn-install-pwa" class="btn-action btn-sm hidden" style="background: rgba(0, 210, 255, 0.15); color: var(--color-accent); border: 1px solid var(--border-active); gap: 6px; padding: 4px 10px; cursor: pointer;">
-                    📲 Install App
+                    <span data-i18n="btn_install_pwa">📲 アプリをインストール</span>
                 </button>
             </div>
             
@@ -84,83 +84,41 @@ $isMock = \mediablue\Config::isMockMode();
             </div>
 
             <div class="status-right">
-                <div class="status-item phone-stat" id="top-phone-stat" title="Smartphone connection">
-                    <span id="top-carrier" class="carrier-text">-</span>
-                    <span id="top-signal" class="signal-bars">
-                        <span class="bar bar1 active"></span>
-                        <span class="bar bar2 active"></span>
-                        <span class="bar bar3 active"></span>
-                        <span class="bar bar4 active"></span>
-                    </span>
-                    <span class="battery-wrapper">
-                        <span class="battery-body">
-                            <span id="top-battery-level" class="battery-level" style="width: 80%;"></span>
-                        </span>
-                        <span id="top-battery-text" class="battery-text">80%</span>
-                    </span>
-                </div>
-                <div class="status-item bt-stat" id="top-bt-stat" title="Bluetooth Status">
+                <div class="status-item bt-stat" id="top-bt-stat" title="Bluetooth接続状態" data-i18n-title="bt_status_title">
                     <svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="m7 7 10 10-5 5V2l5 5L7 17"/>
                     </svg>
-                    <span id="top-bt-device" class="connected-dev-text">No Device</span>
-                </div>
-                <div class="status-item vol-stat" id="top-vol-stat">
-                    <svg id="top-vol-icon" class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                    </svg>
-                    <span id="top-vol-text">75%</span>
+                    <span id="top-bt-device" class="connected-dev-text" data-i18n="no_device_connected">未接続</span>
                 </div>
             </div>
         </header>
 
         <!-- Main Body: Navigation Rail + Content Area -->
         <div class="main-layout">
-            <!-- Automotive Sidebar Navigation -->
+            <!-- Automotive Sidebar Navigation (Media, Settings, About ONLY) -->
             <nav class="side-nav">
-                <button class="nav-btn active" data-tab="tab-player" title="Media Player (A2DP)">
+                <button class="nav-btn active" data-tab="tab-player" title="メディアプレーヤー (A2DP)" data-i18n-title="nav_media_title">
                     <svg class="icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 18V5l12-2v13"/>
                         <circle cx="6" cy="18" r="3"/>
                         <circle cx="18" cy="16" r="3"/>
                     </svg>
-                    <span>Media</span>
+                    <span data-i18n="nav_media">Media</span>
                 </button>
-                <button class="nav-btn" data-tab="tab-phone" title="Hands-Free Phone (HFP)">
-                    <svg class="icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                    </svg>
-                    <span id="phone-nav-badge" class="nav-bubble hidden">!</span>
-                    <span>Phone</span>
-                </button>
-                <button class="nav-btn" data-tab="tab-bluetooth" title="Bluetooth Management">
-                    <svg class="icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="m7 7 10 10-5 5V2l5 5L7 17"/>
-                    </svg>
-                    <span>Bluetooth</span>
-                </button>
-                <button class="nav-btn" data-tab="tab-audio" title="Audio Mixer & Routing">
-                    <svg class="icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="4" y1="21" x2="4" y2="14"/>
-                        <line x1="4" y1="10" x2="4" y2="3"/>
-                        <line x1="12" y1="21" x2="12" y2="12"/>
-                        <line x1="12" y1="8" x2="12" y2="3"/>
-                        <line x1="20" y1="21" x2="20" y2="16"/>
-                        <line x1="20" y1="12" x2="20" y2="3"/>
-                        <line x1="1" y1="14" x2="7" y2="14"/>
-                        <line x1="9" y1="8" x2="15" y2="8"/>
-                        <line x1="17" y1="16" x2="23" y2="16"/>
-                    </svg>
-                    <span>Audio</span>
-                </button>
-                <button class="nav-btn" data-tab="tab-settings" title="System Settings">
+                <button class="nav-btn" data-tab="tab-settings" title="システム設定" data-i18n-title="nav_settings_title">
                     <svg class="icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"/>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                     </svg>
-                    <span>Settings</span>
+                    <span data-i18n="nav_settings">Settings</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-about" title="アプリ情報・開発元" data-i18n-title="nav_about_title">
+                    <svg class="icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    <span data-i18n="nav_about">About</span>
                 </button>
             </nav>
 
@@ -184,10 +142,10 @@ $isMock = \mediablue\Config::isMockMode();
 
                         <div class="player-details">
                             <div class="codec-tag-wrapper">
-                                <span class="badge badge-profile">A2DP Sink</span>
+                                <span class="badge badge-profile" data-i18n="player_profile">A2DP Sink</span>
                                 <span id="player-codec" class="badge badge-codec">AAC 256kbps</span>
                                 <span id="player-app-badge" class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--color-green); border: 1px solid rgba(16, 185, 129, 0.4); display: none;">App</span>
-                                <span id="player-source-dev" class="source-device-name">Ken's iPhone 15 Pro</span>
+                                <span id="player-source-dev" class="source-device-name" data-i18n="no_device_connected">未接続</span>
                             </div>
 
                             <div class="track-info">
@@ -207,9 +165,9 @@ $isMock = \mediablue\Config::isMockMode();
                                 </div>
                             </div>
 
-                            <!-- AVRCP Media Controls -->
+                            <!-- AVRCP Media Controls (Volume controls removed) -->
                             <div class="media-controls">
-                                <button id="btn-shuffle" class="ctrl-btn ctrl-sec" title="Shuffle">
+                                <button id="btn-shuffle" class="ctrl-btn ctrl-sec" title="シャッフル" data-i18n-title="ctrl_shuffle">
                                     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="16 3 21 3 21 8"/>
                                         <line x1="4" y1="20" x2="21" y2="3"/>
@@ -218,13 +176,13 @@ $isMock = \mediablue\Config::isMockMode();
                                         <line x1="4" y1="4" x2="9" y2="9"/>
                                     </svg>
                                 </button>
-                                <button id="btn-prev" class="ctrl-btn ctrl-main" title="Previous Track (AVRCP)">
+                                <button id="btn-prev" class="ctrl-btn ctrl-main" title="前の曲 (AVRCP)" data-i18n-title="ctrl_prev">
                                     <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
                                         <polygon points="19 20 9 12 19 4 19 20"/>
                                         <line x1="5" y1="19" x2="5" y2="5"/>
                                     </svg>
                                 </button>
-                                <button id="btn-play-pause" class="ctrl-btn ctrl-play" title="Play / Pause (AVRCP)">
+                                <button id="btn-play-pause" class="ctrl-btn ctrl-play" title="再生 / 一時停止 (AVRCP)" data-i18n-title="ctrl_play">
                                     <svg id="icon-play" class="hidden" viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
                                         <polygon points="5 3 19 12 5 21 5 3"/>
                                     </svg>
@@ -233,13 +191,13 @@ $isMock = \mediablue\Config::isMockMode();
                                         <rect x="14" y="4" width="4" height="16"/>
                                     </svg>
                                 </button>
-                                <button id="btn-next" class="ctrl-btn ctrl-main" title="Next Track (AVRCP)">
+                                <button id="btn-next" class="ctrl-btn ctrl-main" title="次の曲 (AVRCP)" data-i18n-title="ctrl_next">
                                     <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2">
                                         <polygon points="5 4 15 12 5 20 5 4"/>
                                         <line x1="19" y1="5" x2="19" y2="19"/>
                                     </svg>
                                 </button>
-                                <button id="btn-repeat" class="ctrl-btn ctrl-sec" title="Repeat">
+                                <button id="btn-repeat" class="ctrl-btn ctrl-sec" title="リピート" data-i18n-title="ctrl_repeat">
                                     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="17 1 21 5 17 9"/>
                                         <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
@@ -248,296 +206,194 @@ $isMock = \mediablue\Config::isMockMode();
                                     </svg>
                                 </button>
                             </div>
-
-                            <!-- In-Player Volume -->
-                            <div class="player-vol-row">
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                                </svg>
-                                <input type="range" id="player-volume-slider" min="0" max="100" value="75" class="custom-slider">
-                                <span id="player-volume-text">75%</span>
-                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 2. Phone Tab (HFP - Hands-Free Profile) -->
-                <section id="tab-phone" class="tab-panel">
-                    <div class="phone-layout">
-                        <!-- Left: Status & Active Call Display -->
-                        <div class="phone-left">
-                            <div class="card phone-status-card">
-                                <div class="card-header">
-                                    <span class="badge badge-profile">HFP (Hands-Free Profile)</span>
-                                    <span id="call-state-badge" class="badge badge-idle">IDLE</span>
-                                </div>
-                                <div class="active-call-display">
-                                    <div class="caller-avatar" id="call-avatar">
-                                        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                            <circle cx="12" cy="7" r="4"/>
-                                        </svg>
-                                    </div>
-                                    <h2 id="active-caller-name" class="caller-name">No Active Call</h2>
-                                    <p id="active-caller-number" class="caller-number">-</p>
-                                    <p id="call-timer" class="call-timer">00:00</p>
-                                </div>
-
-                                <!-- In-Call Controls -->
-                                <div id="incall-actions" class="incall-actions hidden">
-                                    <button id="btn-call-mute" class="round-action-btn" title="Mute Microphone">
-                                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <line x1="1" y1="1" x2="23" y2="23"/>
-                                            <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/>
-                                            <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/>
-                                            <line x1="12" y1="19" x2="12" y2="23"/>
-                                            <line x1="8" y1="23" x2="16" y2="23"/>
-                                        </svg>
-                                        <span>Mute</span>
-                                    </button>
-                                    <button id="btn-call-hangup" class="round-action-btn btn-danger" title="Hangup Call">
-                                        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                                            <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.28 8.76 7.4 7 12 7c4.6 0 8.72 1.76 11.71 4.67.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
-                                        </svg>
-                                        <span>End</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right: Touch Keypad & History -->
-                        <div class="phone-right">
-                            <div class="card keypad-card">
-                                <div class="keypad-screen">
-                                    <input type="text" id="dial-display" class="dial-input" placeholder="Enter phone number..." readonly>
-                                    <button id="btn-backspace" class="btn-icon-clear" title="Backspace">⌫</button>
-                                </div>
-                                <div class="keypad-grid">
-                                    <button class="key-btn" data-key="1">1</button>
-                                    <button class="key-btn" data-key="2">2<span class="subtext">ABC</span></button>
-                                    <button class="key-btn" data-key="3">3<span class="subtext">DEF</span></button>
-                                    <button class="key-btn" data-key="4">4<span class="subtext">GHI</span></button>
-                                    <button class="key-btn" data-key="5">5<span class="subtext">JKL</span></button>
-                                    <button class="key-btn" data-key="6">6<span class="subtext">MNO</span></button>
-                                    <button class="key-btn" data-key="7">7<span class="subtext">PQRS</span></button>
-                                    <button class="key-btn" data-key="8">8<span class="subtext">TUV</span></button>
-                                    <button class="key-btn" data-key="9">9<span class="subtext">WXYZ</span></button>
-                                    <button class="key-btn" data-key="*">*</button>
-                                    <button class="key-btn" data-key="0">0<span class="subtext">+</span></button>
-                                    <button class="key-btn" data-key="#">#</button>
-                                </div>
-                                <div class="keypad-bottom">
-                                    <button id="btn-call-start" class="btn-green-call" title="Call Number">
-                                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                                        </svg>
-                                        <span>Call</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 3. Bluetooth Tab (BlueZ Management) -->
-                <section id="tab-bluetooth" class="tab-panel">
-                    <div class="bt-layout">
-                        <!-- Top: Adapter Controls -->
-                        <div class="card adapter-card">
-                            <div class="card-header">
-                                <div class="adapter-title">
-                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="m7 7 10 10-5 5V2l5 5L7 17"/>
-                                    </svg>
-                                    <h3 id="adapter-name">Ubuntu mediablue (hci0)</h3>
-                                </div>
-                                <div class="adapter-switches">
-                                    <label class="switch-item">
-                                        <span>Power</span>
-                                        <input type="checkbox" id="switch-bt-power" checked>
-                                    </label>
-                                    <label class="switch-item">
-                                        <span>Discoverable</span>
-                                        <input type="checkbox" id="switch-bt-discoverable" checked>
-                                    </label>
-                                    <button id="btn-scan" class="btn-action">
-                                        <svg id="scan-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="10"/>
-                                            <line x1="22" y1="12" x2="18" y2="12"/>
-                                            <line x1="6" y1="12" x2="2" y2="12"/>
-                                            <line x1="12" y1="6" x2="12" y2="2"/>
-                                            <line x1="12" y1="22" x2="12" y2="18"/>
-                                        </svg>
-                                        <span id="scan-btn-text">Scan for Devices</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <p class="adapter-mac-text">MAC: <span id="adapter-mac">DC:A6:32:8B:12:34</span></p>
-                        </div>
-
-                        <!-- Device Lists -->
-                        <div class="bt-devices-grid">
-                            <!-- Paired / Connected Devices -->
-                            <div class="card device-list-card">
-                                <h3>Paired & Connected Devices</h3>
-                                <div id="paired-devices-list" class="device-list">
-                                    <!-- Device Cards rendered via JS -->
-                                </div>
-                            </div>
-
-                            <!-- Discovered Devices -->
-                            <div class="card device-list-card">
-                                <h3>Available / Discovered Devices</h3>
-                                <div id="available-devices-list" class="device-list">
-                                    <!-- Discovered Cards rendered via JS -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 4. Audio Mixer Tab (Audioctl / pactl / PipeWire) -->
-                <section id="tab-audio" class="tab-panel">
-                    <div class="audio-layout">
-                        <div class="card">
-                            <h3>Volume & Output Routing (Audioctl / PulseAudio / PipeWire)</h3>
-                            
-                            <!-- Master Volume -->
-                            <div class="mixer-row">
-                                <div class="mixer-label">
-                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                                    </svg>
-                                    <div>
-                                        <strong>Master Volume</strong>
-                                        <p class="subtext">Vehicle Main Audio Output</p>
-                                    </div>
-                                </div>
-                                <div class="mixer-ctrl">
-                                    <input type="range" id="mixer-master-slider" min="0" max="100" value="75" class="custom-slider">
-                                    <span id="mixer-master-val" class="vol-num">75%</span>
-                                    <button id="btn-master-mute" class="btn-mute">Mute</button>
-                                </div>
-                            </div>
-
-                            <!-- Audio Sinks (Output selector) -->
-                            <div class="sink-selection-section">
-                                <h4>Active Output Devices (Sinks)</h4>
-                                <div id="sinks-list" class="sinks-grid">
-                                    <!-- Populated via JS -->
-                                </div>
-                            </div>
-
-                            <!-- Microphone / Handsfree Input -->
-                            <div class="source-selection-section">
-                                <h4>Input Devices (Microphone / HFP)</h4>
-                                <div id="sources-list" class="sources-grid">
-                                    <!-- Populated via JS -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 5. Settings Tab -->
+                <!-- 2. Settings Tab -->
                 <section id="tab-settings" class="tab-panel">
                     <div class="settings-layout">
-                        <!-- Mode Switch -->
+                        <!-- Language Settings -->
                         <div class="card">
-                            <h3>Mode & Simulation Controls</h3>
+                            <h3 data-i18n="card_lang_title">言語設定 / Language</h3>
                             <div class="settings-row">
                                 <div>
-                                    <strong>Operating Mode</strong>
-                                    <p class="subtext">Toggle between live host hardware (BlueZ / Audioctl) and demo simulation</p>
+                                    <strong data-i18n="setting_lang_label">表示言語</strong>
+                                    <p class="subtext" data-i18n="setting_lang_desc">UI全体の表示言語を切り替えます（デフォルト: 日本語）</p>
+                                </div>
+                                <div class="lang-toggles">
+                                    <button id="btn-lang-ja" class="btn-toggle active" data-i18n="lang_ja_btn">日本語</button>
+                                    <button id="btn-lang-en" class="btn-toggle" data-i18n="lang_en_btn">English</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mode & Simulation Controls -->
+                        <div class="card">
+                            <h3 data-i18n="card_mode_title">動作モード & シミュレーション</h3>
+                            <div class="settings-row">
+                                <div>
+                                    <strong data-i18n="setting_mode_label">動作モード</strong>
+                                    <p class="subtext" data-i18n="setting_mode_desc">実機ハードウェア連携（BlueZ / D-Bus）とデモシミュレーションを切り替えます</p>
                                 </div>
                                 <div class="mode-toggles">
-                                    <button id="btn-set-mock" class="btn-toggle <?= $isMock ? 'active' : '' ?>">Simulation Mode</button>
-                                    <button id="btn-set-real" class="btn-toggle <?= !$isMock ? 'active' : '' ?>">Live Host Mode</button>
+                                    <button id="btn-set-mock" class="btn-toggle <?= $isMock ? 'active' : '' ?>" data-i18n="btn_mode_sim">シミュレーションモード</button>
+                                    <button id="btn-set-real" class="btn-toggle <?= !$isMock ? 'active' : '' ?>" data-i18n="btn_mode_real">実機ホストモード</button>
                                 </div>
                             </div>
 
                             <div class="settings-row simulation-tools <?= $isMock ? '' : 'hidden' ?>" id="sim-tools-row">
                                 <div>
-                                    <strong>Simulation Tools</strong>
-                                    <p class="subtext">Simulate real-world phone calls & bluetooth events</p>
+                                    <strong data-i18n="setting_sim_tools">シミュレーションツール</strong>
+                                    <p class="subtext" data-i18n="setting_sim_tools_desc">デモシミュレーションの再生状態を初期状態に戻します</p>
                                 </div>
                                 <div class="sim-actions">
-                                    <button id="btn-trigger-call" class="btn-action">📞 Trigger Incoming Call</button>
-                                    <button id="btn-reset-mock" class="btn-action btn-secondary">🔄 Reset State</button>
+                                    <button id="btn-reset-mock" class="btn-action btn-secondary" data-i18n="btn_reset_mock">🔄 状態をリセット</button>
                                 </div>
                             </div>
                         </div>
 
                         <!-- PWA Settings -->
                         <div class="card">
-                            <h3>Progressive Web App (PWA)</h3>
+                            <h3 data-i18n="card_pwa_title">プログレッシブウェブアプリ (PWA)</h3>
                             <div class="settings-row">
                                 <div>
-                                    <strong>Standalone App Installation</strong>
-                                    <p class="subtext">Install mediablue onto your vehicle display or home screen for a fullscreen native experience</p>
+                                    <strong data-i18n="setting_pwa_install">スタンドアロンアプリのインストール</strong>
+                                    <p class="subtext" data-i18n="setting_pwa_install_desc">車載ディスプレイやホーム画面にインストールして全画面ネイティブ表示で利用できます</p>
                                 </div>
                                 <div class="sim-actions">
-                                    <button id="btn-settings-install-pwa" class="btn-action">📲 Install App</button>
-                                    <button id="btn-clear-cache" class="btn-action btn-secondary">🧹 Clear Cache</button>
+                                    <button id="btn-settings-install-pwa" class="btn-action" data-i18n="btn_pwa_install">📲 アプリをインストール</button>
+                                    <button id="btn-clear-cache" class="btn-action btn-secondary" data-i18n="btn_pwa_clear">🧹 キャッシュをクリア</button>
                                 </div>
                             </div>
                             <div class="settings-row">
                                 <div>
-                                    <strong>Offline Capabilities & Service Worker</strong>
-                                    <p class="subtext">Caches UI shell for instant boot and network resilience</p>
+                                    <strong data-i18n="setting_pwa_sw">オフライン機能 & Service Worker</strong>
+                                    <p class="subtext" data-i18n="setting_pwa_sw_desc">UIシェルをローカルキャッシュし、瞬時の起動とネットワーク耐性を提供します</p>
                                 </div>
                                 <div>
-                                    <span id="pwa-sw-status" class="badge badge-active">SW Active</span>
+                                    <span id="pwa-sw-status" class="badge badge-active" data-i18n="badge_sw_active">SW 稼働中</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- System Diagnostics -->
                         <div class="card">
-                            <h3>System Diagnostics & Host Health</h3>
+                            <h3 data-i18n="card_diag_title">システム診断 & ホスト状態</h3>
                             <table class="diag-table">
                                 <tbody>
                                     <tr>
-                                        <td>Operating System</td>
+                                        <td data-i18n="diag_os">オペレーティングシステム</td>
                                         <td id="diag-os">-</td>
                                     </tr>
                                     <tr>
-                                        <td>PHP Runtime</td>
+                                        <td data-i18n="diag_php">PHP ランタイム</td>
                                         <td id="diag-php">-</td>
                                     </tr>
                                     <tr>
-                                        <td>BlueZ (bluetoothctl)</td>
+                                        <td data-i18n="diag_btctl">BlueZ (bluetoothctl)</td>
                                         <td id="diag-btctl">-</td>
                                     </tr>
                                     <tr>
-                                        <td>PulseAudio / PipeWire (pactl)</td>
+                                        <td data-i18n="diag_pactl">PulseAudio / PipeWire (pactl)</td>
                                         <td id="diag-pactl">-</td>
                                     </tr>
                                     <tr>
-                                        <td>Media MPRIS (playerctl)</td>
+                                        <td data-i18n="diag_playerctl">Media MPRIS (playerctl)</td>
                                         <td id="diag-playerctl">-</td>
                                     </tr>
                                     <tr>
-                                        <td>WirePlumber (wpctl)</td>
+                                        <td data-i18n="diag_wpctl">WirePlumber (wpctl)</td>
                                         <td id="diag-wpctl">-</td>
                                     </tr>
                                     <tr>
-                                        <td>D-Bus System Socket</td>
+                                        <td data-i18n="diag_dbus">D-Bus システムソケット</td>
                                         <td id="diag-dbus">-</td>
                                     </tr>
                                     <tr>
-                                        <td>BlueZ D-Bus Service</td>
+                                        <td data-i18n="diag_bluez_dbus">BlueZ D-Bus 接続</td>
                                         <td id="diag-bluez-dbus">-</td>
                                     </tr>
                                     <tr>
-                                        <td>BlueZ MediaPlayer1 (AVRCP)</td>
+                                        <td data-i18n="diag_media_player">BlueZ MediaPlayer1 (AVRCP)</td>
                                         <td id="diag-media-player">-</td>
                                     </tr>
                                     <tr>
-                                        <td>PULSE_SERVER</td>
+                                        <td data-i18n="diag_pulse_server">PULSE_SERVER</td>
                                         <td id="diag-pulse-server">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. About Tab -->
+                <section id="tab-about" class="tab-panel">
+                    <div class="about-layout">
+                        <!-- Hero Banner -->
+                        <div class="card about-hero-card">
+                            <span class="about-brand-tag" data-i18n="about_hero_tag">ENOKI ELECTRONICS - AUTOMOTIVE SOLUTIONS</span>
+                            <h1 class="about-title" data-i18n="about_title">エノキ電気 A2DP Sink クライアント</h1>
+                            <p class="about-subtitle" data-i18n="about_subtitle">車載向け 高品位 Bluetooth オーディオ受信システム</p>
+                        </div>
+
+                        <!-- Product Overview Description -->
+                        <div class="card about-desc-card">
+                            <h3 data-i18n="about_desc_title">製品概要</h3>
+                            <p data-i18n="about_desc_body">
+                                本アプリケーションは、「エノキ電気 ENOKI ELECTRONICS」が開発した車載向け A2DP Sink クライアントアプリです。
+                                スマートフォンやタブレット、ポータブルメディアプレーヤー等のBluetooth送信機（A2DP Source）から高品位なオーディオストリーミングを受信し、AVRCPによるリアルタイムな楽曲情報取得（曲名・アーティスト・アルバム・再生時間）および再生制御（再生・一時停止・トラック送り・戻し）を提供します。
+                            </p>
+                        </div>
+
+                        <!-- Highlights / Features Grid -->
+                        <div class="card">
+                            <h3 data-i18n="about_features_title">主な仕様と設計思想</h3>
+                            <div class="features-grid">
+                                <div class="feature-box">
+                                    <h4 data-i18n="feat_1_title">🎵 A2DP Sink オーディオ受信</h4>
+                                    <p data-i18n="feat_1_desc">Linux BlueZ およびオーディオサーバー（PipeWire / PulseAudio）と直接連動し、AAC / SBC / LDAC / aptX等の各種高品位コーデックストリーミングを受信します。</p>
+                                </div>
+                                <div class="feature-box">
+                                    <h4 data-i18n="feat_2_title">🎛️ AVRCP メディアコントロール</h4>
+                                    <p data-i18n="feat_2_desc">BlueZ MediaPlayer1 / MediaControl1 インターフェースにより、車載タッチパネルからスマートフォン側の再生アプリを直感的に遠隔操作できます。</p>
+                                </div>
+                                <div class="feature-box">
+                                    <h4 data-i18n="feat_3_title">🔇 外部ボリューム統合設計</h4>
+                                    <p data-i18n="feat_3_desc">車載オーディオの安全かつ統一的な音響設計に基づき、音量調整は車両側のマスターボリュームやステアリングスイッチで実施するため、本アプリ内からはボリュームコントロールを排他・削除しています。</p>
+                                </div>
+                                <div class="feature-box">
+                                    <h4 data-i18n="feat_4_title">📱 PWA & 車載ハイコントラストUI</h4>
+                                    <p data-i18n="feat_4_desc">運転時の視認性に配慮したハイコントラスト・ダークテーマ。PWAとして車載ディスプレイやタブレットにインストールすることで、全画面スタンドアロンで動作します。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Specifications & Manufacturer Information Table -->
+                        <div class="card">
+                            <h3 data-i18n="about_info_title">製品仕様・開発元情報</h3>
+                            <table class="diag-table">
+                                <tbody>
+                                    <tr>
+                                        <td data-i18n="info_vendor_label">製造・開発元</td>
+                                        <td data-i18n="info_vendor_val">エノキ電気 (ENOKI ELECTRONICS)</td>
+                                    </tr>
+                                    <tr>
+                                        <td data-i18n="info_product_label">製品名</td>
+                                        <td data-i18n="info_product_val">車載 A2DP Sink クライアントアプリケーション</td>
+                                    </tr>
+                                    <tr>
+                                        <td data-i18n="info_version_label">バージョン</td>
+                                        <td data-i18n="info_version_val">v2.0.0 (2026 Edition)</td>
+                                    </tr>
+                                    <tr>
+                                        <td data-i18n="info_type_label">Bluetoothプロファイル</td>
+                                        <td data-i18n="info_type_val">A2DP Sink (Audio Sink) / AVRCP Target</td>
+                                    </tr>
+                                    <tr>
+                                        <td data-i18n="info_license_label">著作権表示</td>
+                                        <td data-i18n="info_license_val">© 2026 エノキ電気 (ENOKI ELECTRONICS). All rights reserved.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -547,43 +403,14 @@ $isMock = \mediablue\Config::isMockMode();
             </main>
         </div>
 
-        <!-- Incoming Call Modal Overlay -->
-        <div id="incoming-modal" class="modal-overlay hidden">
-            <div class="modal-card incoming-call-box">
-                <div class="call-pulse-circle">
-                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                    </svg>
-                </div>
-                <h3>Incoming Phone Call (HFP)</h3>
-                <h1 id="modal-caller-name">Yamada Taro</h1>
-                <p id="modal-caller-number">090-1234-5678</p>
-                <div class="modal-call-actions">
-                    <button id="btn-modal-reject" class="btn-modal-action btn-modal-reject">
-                        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                            <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.996.996 0 0 1 0-1.41C3.28 8.76 7.4 7 12 7c4.6 0 8.72 1.76 11.71 4.67.39.39.39 1.02 0 1.41l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
-                        </svg>
-                        <span>Decline</span>
-                    </button>
-                    <button id="btn-modal-answer" class="btn-modal-action btn-modal-answer">
-                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                        </svg>
-                        <span>Answer</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- Notification Toast -->
         <div id="toast" class="toast hidden"></div>
     </div>
 
     <!-- Scripts -->
+    <script src="/js/i18n.js"></script>
     <script src="/js/app.js"></script>
     <script src="/js/player.js"></script>
-    <script src="/js/phone.js"></script>
     <script src="/js/bluetooth.js"></script>
-    <script src="/js/audio.js"></script>
 </body>
 </html>

@@ -1,34 +1,39 @@
 /**
  * mediablue Application Core
+ * Manufacturer: エノキ電気 ENOKI ELECTRONICS
  */
 const App = {
   pollingInterval: null,
   deferredPrompt: null,
+  isMock: false,
 
   init() {
+    // 1. 国際化 (i18n) 初期化 (デフォルト: 日本語)
+    if (typeof I18n !== 'undefined') {
+      I18n.init()
+    }
+
     this.initPWA()
     this.initTabs()
     this.initClock()
     this.initSettings()
 
-    // 各機能モジュール初期化
-    Player.init()
-    Phone.init()
-    Bluetooth.init()
-    AudioMixer.init()
+    // 2. 機能モジュール初期化 (Media Player & Bluetooth Status)
+    if (typeof Player !== 'undefined') Player.init()
+    if (typeof Bluetooth !== 'undefined') Bluetooth.init()
 
-    // 最初のデータロード
+    // 3. 最初のデータロード
     this.refreshAll()
 
-    // 1秒ごとに自動更新（再生位置、アクティブメディアプレイヤーの追従、通話ステータス）
+    // 4. 定期更新 (1秒ごとに再生位置 & AVRCP更新)
     this.pollingInterval = setInterval(() => {
       this.pollFast()
     }, 1000)
 
-    // 10秒ごとの低頻度更新（デバイス一覧など）
+    // 5. 5秒ごとにBluetooth接続状態更新
     setInterval(() => {
-      Bluetooth.loadDevices()
-    }, 10000)
+      if (typeof Bluetooth !== 'undefined') Bluetooth.loadStatus()
+    }, 5000)
   },
 
   initTabs() {
@@ -49,12 +54,12 @@ const App = {
           panel.classList.add('active')
         }
 
-        // タブ切り替え時に即座にそのタブのデータをリフレッシュ
-        if (targetTab === 'tab-player') Player.refresh()
-        else if (targetTab === 'tab-phone') Phone.refresh()
-        else if (targetTab === 'tab-bluetooth') Bluetooth.refresh()
-        else if (targetTab === 'tab-audio') AudioMixer.refresh()
-        else if (targetTab === 'tab-settings') this.loadDiagnostics()
+        // タブ切り替え時のリフレッシュ
+        if (targetTab === 'tab-player' && typeof Player !== 'undefined') {
+          Player.refresh()
+        } else if (targetTab === 'tab-settings') {
+          this.loadDiagnostics()
+        }
       })
     })
   },
@@ -85,7 +90,11 @@ const App = {
     if (btnReset) {
       btnReset.addEventListener('click', async () => {
         await fetch('/api/system/reset-mock', { method: 'POST' })
-        this.toast('Simulation state reset to default')
+        this.toast(
+          typeof I18n !== 'undefined'
+            ? I18n.t('toast_reset_sim')
+            : 'Simulation state reset to default'
+        )
         this.refreshAll()
       })
     }
@@ -100,13 +109,25 @@ const App = {
       })
       const data = await res.json()
       if (data.success) {
-        this.toast(
-          isMock ? 'Switched to Simulation Mode' : 'Switched to Live Host Mode',
-        )
+        this.isMock = isMock
+        const msg = isMock
+          ? (typeof I18n !== 'undefined' ? I18n.t('toast_switched_sim') : 'Switched to Simulation Mode')
+          : (typeof I18n !== 'undefined' ? I18n.t('toast_switched_real') : 'Switched to Live Host Mode')
+        this.toast(msg)
         setTimeout(() => location.reload(), 500)
       }
     } catch (e) {
       this.toast('Failed to change mode')
+    }
+  },
+
+  updateModeBadge() {
+    const badge = document.getElementById('mode-badge')
+    if (!badge) return
+    const isMock = badge.classList.contains('badge-mock')
+    this.isMock = isMock
+    if (typeof I18n !== 'undefined') {
+      badge.textContent = I18n.t(isMock ? 'mode_mock' : 'mode_real')
     }
   },
 
@@ -116,31 +137,20 @@ const App = {
       const data = await res.json()
       if (data.success) {
         const s = data.system
-        document.getElementById('diag-os').textContent = s.os
-        document.getElementById('diag-php').textContent = s.php_version
-        document.getElementById('diag-btctl').textContent = s.has_bluetoothctl
-          ? 'Installed ✅'
-          : 'Missing ❌'
-        document.getElementById('diag-pactl').textContent = s.has_pactl
-          ? 'Installed ✅'
-          : 'Missing ❌'
-        document.getElementById('diag-playerctl').textContent = s.has_playerctl
-          ? 'Installed ✅'
-          : 'Not Found (Fallback to Bluez)'
-        document.getElementById('diag-wpctl').textContent = s.has_wpctl
-          ? 'Installed ✅'
-          : 'Not Found'
-        document.getElementById('diag-dbus').textContent = s.has_dbus_socket
-          ? 'Available (/var/run/dbus/system_bus_socket) ✅'
-          : 'Not Found (Check Docker Mount)'
-        document.getElementById('diag-bluez-dbus').textContent = s.bluez_dbus_connected
-          ? 'Connected (org.bluez OK) ✅'
-          : 'Failed / Unreachable ❌'
-        document.getElementById('diag-media-player').textContent = s.media_player_path
-          ? `Found (${s.media_player_path}) ✅`
-          : 'Not Detected (Connect phone & open music app)'
-        document.getElementById('diag-pulse-server').textContent =
-          s.pulse_server
+        const setVal = (id, val) => {
+          const el = document.getElementById(id)
+          if (el) el.textContent = val
+        }
+        setVal('diag-os', s.os)
+        setVal('diag-php', s.php_version)
+        setVal('diag-btctl', s.has_bluetoothctl ? 'Installed ✅' : 'Missing ❌')
+        setVal('diag-pactl', s.has_pactl ? 'Installed ✅' : 'Missing ❌')
+        setVal('diag-playerctl', s.has_playerctl ? 'Installed ✅' : 'Not Found (Fallback to Bluez)')
+        setVal('diag-wpctl', s.has_wpctl ? 'Installed ✅' : 'Not Found')
+        setVal('diag-dbus', s.has_dbus_socket ? 'Available (/var/run/dbus/system_bus_socket) ✅' : 'Not Found (Check Docker Mount)')
+        setVal('diag-bluez-dbus', s.bluez_dbus_connected ? 'Connected (org.bluez OK) ✅' : 'Failed / Unreachable ❌')
+        setVal('diag-media-player', s.media_player_path ? `Found (${s.media_player_path}) ✅` : 'Not Detected (Connect phone & open music app)')
+        setVal('diag-pulse-server', s.pulse_server)
       }
     } catch (e) {
       console.error('Diagnostics failed', e)
@@ -148,23 +158,19 @@ const App = {
   },
 
   refreshAll() {
-    Player.refresh()
-    Phone.refresh()
-    Bluetooth.refresh()
-    AudioMixer.refresh()
+    if (typeof Player !== 'undefined') Player.refresh()
+    if (typeof Bluetooth !== 'undefined') Bluetooth.loadStatus()
     this.loadDiagnostics()
+    this.updateModeBadge()
   },
 
   pollFast() {
-    Player.refresh()
-    Phone.refresh()
+    if (typeof Player !== 'undefined') Player.refresh()
   },
 
   initPWA() {
     const btnHeaderInstall = document.getElementById('btn-install-pwa')
-    const btnSettingsInstall = document.getElementById(
-      'btn-settings-install-pwa',
-    )
+    const btnSettingsInstall = document.getElementById('btn-settings-install-pwa')
     const btnClearCache = document.getElementById('btn-clear-cache')
     const swStatusEl = document.getElementById('pwa-sw-status')
 
@@ -174,12 +180,9 @@ const App = {
         navigator.serviceWorker
           .register('/sw.js')
           .then((registration) => {
-            console.log(
-              '[PWA] ServiceWorker registered with scope:',
-              registration.scope,
-            )
+            console.log('[PWA] ServiceWorker registered with scope:', registration.scope)
             if (swStatusEl) {
-              swStatusEl.textContent = 'Active (Ready)'
+              swStatusEl.textContent = typeof I18n !== 'undefined' ? I18n.t('badge_sw_active') : 'Active'
               swStatusEl.className = 'badge badge-active'
             }
           })
@@ -198,24 +201,20 @@ const App = {
       }
     }
 
-    // PWA インストールプロンプト (beforeinstallprompt) のハンドリング
+    // PWA インストールプロンプト
     window.addEventListener('beforeinstallprompt', (e) => {
-      // 自動ポップアップを防ぎ、カスタムボタンをトリガーにする
       e.preventDefault()
       this.deferredPrompt = e
 
       if (btnHeaderInstall) btnHeaderInstall.classList.remove('hidden')
       if (btnSettingsInstall) {
         btnSettingsInstall.disabled = false
-        btnSettingsInstall.textContent = '📲 Install App'
       }
     })
 
     const triggerInstall = async () => {
       if (!this.deferredPrompt) {
-        this.toast(
-          'App is already installed or your browser does not support installation.',
-        )
+        this.toast('App is already installed or your browser does not support installation.')
         return
       }
       this.deferredPrompt.prompt()
@@ -232,9 +231,8 @@ const App = {
       btnSettingsInstall.addEventListener('click', triggerInstall)
     }
 
-    // インストール完了イベント
     window.addEventListener('appinstalled', () => {
-      this.toast('mediablue was successfully installed!')
+      this.toast('App was successfully installed!')
       if (btnHeaderInstall) btnHeaderInstall.classList.add('hidden')
       if (btnSettingsInstall) {
         btnSettingsInstall.disabled = true
@@ -242,13 +240,17 @@ const App = {
       }
     })
 
-    // キャッシュクリアボタン
+    // キャッシュクリア
     if (btnClearCache) {
       btnClearCache.addEventListener('click', async () => {
         if ('caches' in window) {
           const cacheNames = await caches.keys()
           await Promise.all(cacheNames.map((name) => caches.delete(name)))
-          this.toast('Cache cleared. Reloading app...')
+          this.toast(
+            typeof I18n !== 'undefined'
+              ? I18n.t('toast_cache_cleared')
+              : 'Cache cleared. Reloading app...'
+          )
           setTimeout(() => location.reload(true), 800)
         } else {
           location.reload(true)

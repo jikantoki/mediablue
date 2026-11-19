@@ -1,14 +1,17 @@
 /**
  * Media Player (A2DP Sink / AVRCP) Logic
+ * Manufacturer: エノキ電気 ENOKI ELECTRONICS
  */
 const Player = {
   isPlaying: false,
+  lastPlayer: null,
 
   init() {
     const btnPlayPause = document.getElementById('btn-play-pause')
     const btnNext = document.getElementById('btn-next')
     const btnPrev = document.getElementById('btn-prev')
-    const volSlider = document.getElementById('player-volume-slider')
+    const btnShuffle = document.getElementById('btn-shuffle')
+    const btnRepeat = document.getElementById('btn-repeat')
 
     if (btnPlayPause) {
       btnPlayPause.addEventListener('click', () => this.control('play-pause'))
@@ -19,14 +22,11 @@ const Player = {
     if (btnPrev) {
       btnPrev.addEventListener('click', () => this.control('prev'))
     }
-    if (volSlider) {
-      volSlider.addEventListener('input', (e) => {
-        const val = e.target.value
-        document.getElementById('player-volume-text').textContent = val + '%'
-      })
-      volSlider.addEventListener('change', (e) => {
-        AudioMixer.setVolume(e.target.value)
-      })
+    if (btnShuffle) {
+      btnShuffle.addEventListener('click', () => this.control('shuffle'))
+    }
+    if (btnRepeat) {
+      btnRepeat.addEventListener('click', () => this.control('repeat'))
     }
   },
 
@@ -35,6 +35,7 @@ const Player = {
       const res = await fetch('/api/media/player')
       const data = await res.json()
       if (data.success && data.player) {
+        this.lastPlayer = data.player
         this.updateUI(data.player)
       }
     } catch (e) {
@@ -42,13 +43,40 @@ const Player = {
     }
   },
 
+  updateIdleTexts() {
+    if (!this.lastPlayer || !this.lastPlayer.title || this.lastPlayer.title === 'No Media Playing' || this.lastPlayer.title === '再生中のメディアはありません') {
+      const titleEl = document.getElementById('track-title')
+      const artistEl = document.getElementById('track-artist')
+      if (titleEl) {
+        titleEl.textContent = (typeof I18n !== 'undefined') ? I18n.t('no_media_playing') : 'No Media Playing'
+      }
+      if (artistEl) {
+        artistEl.textContent = (typeof I18n !== 'undefined') ? I18n.t('connect_bt_prompt') : 'Connect Bluetooth Device'
+      }
+    }
+  },
+
   updateUI(p) {
-    document.getElementById('track-title').textContent =
-      p.title || 'No Media Playing'
-    document.getElementById('track-artist').textContent =
-      p.artist || 'Connect Bluetooth Device'
-    document.getElementById('track-album').textContent = p.album || ''
-    document.getElementById('player-codec').textContent = p.codec || 'A2DP'
+    const defaultTitle = (typeof I18n !== 'undefined') ? I18n.t('no_media_playing') : 'No Media Playing'
+    const defaultArtist = (typeof I18n !== 'undefined') ? I18n.t('connect_bt_prompt') : 'Connect Bluetooth Device'
+
+    const titleEl = document.getElementById('track-title')
+    const artistEl = document.getElementById('track-artist')
+    const albumEl = document.getElementById('track-album')
+    const codecEl = document.getElementById('player-codec')
+
+    if (titleEl) {
+      titleEl.textContent = (p.title && p.title !== 'No Media Playing') ? p.title : defaultTitle
+    }
+    if (artistEl) {
+      artistEl.textContent = (p.artist && p.artist !== 'Connect Bluetooth Device') ? p.artist : defaultArtist
+    }
+    if (albumEl) {
+      albumEl.textContent = p.album || ''
+    }
+    if (codecEl) {
+      codecEl.textContent = p.codec || 'A2DP'
+    }
 
     // アプリ名バッジの表示 (Spotify, Apple Music, YouTube 等)
     const appBadge = document.getElementById('player-app-badge')
@@ -68,18 +96,22 @@ const Player = {
     const albumCover = document.getElementById('album-cover')
 
     if (this.isPlaying) {
-      iconPlay.classList.add('hidden')
-      iconPause.classList.remove('hidden')
-      albumCover.classList.add('playing')
-      albumCover.classList.remove('paused')
+      if (iconPlay) iconPlay.classList.add('hidden')
+      if (iconPause) iconPause.classList.remove('hidden')
+      if (albumCover) {
+        albumCover.classList.add('playing')
+        albumCover.classList.remove('paused')
+      }
     } else {
-      iconPlay.classList.remove('hidden')
-      iconPause.classList.add('hidden')
-      albumCover.classList.remove('playing')
-      albumCover.classList.add('paused')
+      if (iconPlay) iconPlay.classList.remove('hidden')
+      if (iconPause) iconPause.classList.add('hidden')
+      if (albumCover) {
+        albumCover.classList.remove('playing')
+        albumCover.classList.add('paused')
+      }
     }
 
-    if (p.cover) {
+    if (p.cover && albumCover) {
       albumCover.style.background = p.cover
     }
 
@@ -88,9 +120,13 @@ const Player = {
     const dur = p.duration || 1
     const pct = Math.min(100, Math.max(0, (cur / dur) * 100))
 
-    document.getElementById('progress-fill').style.width = pct + '%'
-    document.getElementById('time-current').textContent = this.formatTime(cur)
-    document.getElementById('time-duration').textContent = this.formatTime(dur)
+    const fillEl = document.getElementById('progress-fill')
+    const curEl = document.getElementById('time-current')
+    const durEl = document.getElementById('time-duration')
+
+    if (fillEl) fillEl.style.width = pct + '%'
+    if (curEl) curEl.textContent = this.formatTime(cur)
+    if (durEl) durEl.textContent = this.formatTime(dur)
   },
 
   async control(action) {
@@ -104,13 +140,17 @@ const Player = {
       if (data.success) {
         this.refresh()
       } else {
-        const errMsg = data.error || 'Control failed'
+        const errMsg = data.error || (typeof I18n !== 'undefined' ? I18n.t('toast_cmd_failed') : 'Control failed')
         console.warn('AVRCP Error:', data)
-        App.toast('AVRCP: ' + errMsg)
+        if (typeof App !== 'undefined' && App.toast) {
+          App.toast('AVRCP: ' + errMsg)
+        }
       }
     } catch (e) {
       console.error('AVRCP request error:', e)
-      App.toast('Failed to send control command')
+      if (typeof App !== 'undefined' && App.toast) {
+        App.toast(typeof I18n !== 'undefined' ? I18n.t('toast_cmd_failed') : 'Failed to send control command')
+      }
     }
   },
 
