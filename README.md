@@ -1,5 +1,7 @@
 # Mediablue - A2DP Sink & HFP Web Client
 
+![アイコン](./icon.png)
+
 Ubuntu、BlueZ、Audioctl (PipeWire / WirePlumber / PulseAudio) との連携を前提とした、**A2DP Sink（オーディオ受信）** および **HFP（ハンズフリー通話）** に対応した車載向けWebクライアントアプリケーションです。
 
 バックエンドにはPHPを採用し、Dockerコンテナとして容易にビルド・起動できます。実機ハードウェア連携モードに加え、Bluetooth機器がない開発環境でも全UI・機能をテストできる**シミュレーション（モック）モード**を標準搭載しています。
