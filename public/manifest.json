@@ -1,6 +1,6 @@
 {
-  "name": "A2DP Sink - ENOKI ELECTRONICS",
-  "short_name": "A2DP Sink",
+  "name": "Mediablue - A2DP Sink",
+  "short_name": "Mediablue",
   "description": "エノキ電気 (ENOKI ELECTRONICS) 車載 A2DP Sink クライアントアプリ",
   "start_url": "/",
   "scope": "/",

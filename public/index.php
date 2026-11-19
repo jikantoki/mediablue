@@ -42,7 +42,7 @@ $isMock = \mediablue\Config::isMockMode();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title data-i18n="app_title">A2DP Sink クライアント - エノキ電気 ENOKI ELECTRONICS</title>
+    <title data-i18n="app_title">Mediablue - A2DP Sink クライアント</title>
     
     <!-- PWA Settings -->
     <link rel="manifest" href="/manifest.json">
@@ -69,7 +69,7 @@ $isMock = \mediablue\Config::isMockMode();
                         <path d="M9 17h6"/>
                         <circle cx="17" cy="17" r="2"/>
                     </svg>
-                    <span data-i18n="brand_name">エノキ電気 ENOKI ELECTRONICS</span>
+                    <span data-i18n="brand_name">Mediablue</span>
                 </span>
                 <span id="mode-badge" class="badge <?= $isMock ? 'badge-mock' : 'badge-real' ?>">
                     <?= $isMock ? 'シミュレーションモード' : '実機ホストモード' ?>
