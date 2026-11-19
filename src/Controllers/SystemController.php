@@ -25,7 +25,7 @@ class SystemController
 
         // MediaPlayer1 オブジェクトの検出テスト
         $mediaService = new \mediablue\Services\MediaService();
-        $mediaPlayerPath = $mediaService->findMediaPlayerPath();
+        $mediaPlayerPath = $mediaService->findActivePlayerPath();
 
         Response::success([
             'system' => [

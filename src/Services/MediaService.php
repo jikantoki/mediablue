@@ -7,181 +7,111 @@ use mediablue\Utils\CommandRunner;
 class MediaService
 {
     /**
-     * D-Busから現在利用可能なすべてのBlueZ MediaPlayer1オブジェクトを取得・パースする
-     *
-     * @return array[] 検出された各プレイヤーの情報配列
+     * 接続中のBluetoothオーディオデバイスのD-Busパスを取得する
+     * 例: /org/bluez/hci0/dev_64_A2_F9_3B_5C_88
      */
-    public function getAllMediaPlayers(): array
+    public function getConnectedDevicePath(): ?string
     {
-        $players = [];
-
-        // 1. D-Bus ObjectManager から全オブジェクトを取得 (最も包括的かつ高速)
+        // 1. D-Bus ObjectManager から Connected == true のデバイスを探す (最速)
         $res = CommandRunner::run("dbus-send --system --print-reply --dest=org.bluez / org.freedesktop.DBus.ObjectManager.GetManagedObjects 2>/dev/null");
         if ($res['success'] && !empty($res['stdout'])) {
-            $raw = $res['stdout'];
-
-            // "object path "/org/bluez/.../playerX" ごとにブロックを分割
-            $blocks = preg_split('/(?=object path "\/org\/bluez\/[^\/]+\/dev_[^\/]+\/player\d+")/i', $raw);
-
-            foreach ($blocks as $block) {
-                if (!preg_match('/object path "(\/org\/bluez\/[^\/]+\/dev_[^\/]+\/player(\d+))"/i', $block, $pm)) {
-                    continue;
-                }
-
-                // org.bluez.MediaPlayer1 インターフェースを含むブロックのみ
-                if (!str_contains($block, 'org.bluez.MediaPlayer1')) {
-                    continue;
-                }
-
-                $path = $pm[1];
-                $playerNum = (int)$pm[2];
-
-                $status = 'stopped';
-                $name = '';
-                $title = '';
-                $artist = '';
-                $album = '';
-                $position = 0;
-                $duration = 0;
-
-                if (preg_match('/string\s+"Status"\s+variant\s+string\s+"([^"]+)"/i', $block, $m)) {
-                    $status = strtolower(trim($m[1]));
-                }
-                if (preg_match('/string\s+"Name"\s+variant\s+string\s+"([^"]+)"/i', $block, $m)) {
-                    $name = trim($m[1]);
-                }
-                if (preg_match('/string\s+"Title"\s+variant\s+string\s+"([^"]+)"/i', $block, $m)) {
-                    $title = trim($m[1]);
-                }
-                if (preg_match('/string\s+"Artist"\s+variant\s+string\s+"([^"]+)"/i', $block, $m)) {
-                    $artist = trim($m[1]);
-                }
-                if (preg_match('/string\s+"Album"\s+variant\s+string\s+"([^"]+)"/i', $block, $m)) {
-                    $album = trim($m[1]);
-                }
-                if (preg_match('/string\s+"Position"\s+variant\s+uint32\s+(\d+)/i', $block, $m)) {
-                    $position = (int)round((int)$m[1] / 1000);
-                }
-                if (preg_match('/string\s+"Duration"\s+variant\s+uint32\s+(\d+)/i', $block, $m)) {
-                    $duration = (int)round((int)$m[1] / 1000);
-                }
-
-                // プレイヤーの優先度スコアリング
-                // 1. 現在再生中(playing)のものを最優先
-                // 2. 次に一時停止中(paused)で曲名があるもの
-                // 3. プレイヤー番号が大きい（新しく生成された）ものを優先
-                $score = 0;
-                if ($status === 'playing') {
-                    $score += 10000;
-                } elseif ($status === 'paused') {
-                    $score += 2000;
-                }
-
-                if (!empty($title)) {
-                    $score += 500;
-                }
-                if ($position > 0) {
-                    $score += 100;
-                }
-                $score += $playerNum * 10;
-
-                $players[] = [
-                    'path' => $path,
-                    'player_num' => $playerNum,
-                    'app_name' => $name ?: 'Bluetooth Player',
-                    'status' => in_array($status, ['playing', 'paused']) ? $status : 'stopped',
-                    'title' => $title,
-                    'artist' => $artist,
-                    'album' => $album,
-                    'position' => $position,
-                    'duration' => $duration ?: 180,
-                    'score' => $score,
-                    'source' => 'dbus-objectmanager'
-                ];
-            }
-        }
-
-        // 2. ObjectManager で見つからなかった場合のフォールバック:
-        // 接続中デバイスのMACから player0 〜 player4 を直接スキャン
-        if (empty($players)) {
-            $btRes = CommandRunner::run("bluetoothctl info 2>/dev/null");
-            if ($btRes['success'] && preg_match('/Device\s+([0-9A-Fa-f:]{17})/i', $btRes['stdout'], $m)) {
-                $formattedMac = 'dev_' . str_replace(':', '_', strtoupper(trim($m[1])));
-
-                // player0 から player4 までチェック
-                for ($i = 0; $i <= 4; $i++) {
-                    $candidate = "/org/bluez/hci0/{$formattedMac}/player{$i}";
-                    $cmd = "dbus-send --system --print-reply --dest=org.bluez " . escapeshellarg($candidate) . " org.freedesktop.DBus.Properties.GetAll string:org.bluez.MediaPlayer1 2>/dev/null";
-                    $pRes = CommandRunner::run($cmd);
-                    if ($pRes['success'] && !empty($pRes['stdout'])) {
-                        $pOut = $pRes['stdout'];
-                        $status = 'stopped';
-                        $name = '';
-                        $title = '';
-                        $artist = '';
-                        $album = '';
-                        $position = 0;
-                        $duration = 0;
-
-                        if (preg_match('/string\s+"Status"\s+variant\s+string\s+"([^"]+)"/i', $pOut, $sm)) {
-                            $status = strtolower(trim($sm[1]));
-                        }
-                        if (preg_match('/string\s+"Name"\s+variant\s+string\s+"([^"]+)"/i', $pOut, $nm)) {
-                            $name = trim($nm[1]);
-                        }
-                        if (preg_match('/string\s+"Title"\s+variant\s+string\s+"([^"]+)"/i', $pOut, $tm)) {
-                            $title = trim($tm[1]);
-                        }
-                        if (preg_match('/string\s+"Artist"\s+variant\s+string\s+"([^"]+)"/i', $pOut, $am)) {
-                            $artist = trim($am[1]);
-                        }
-                        if (preg_match('/string\s+"Album"\s+variant\s+string\s+"([^"]+)"/i', $pOut, $alm)) {
-                            $album = trim($alm[1]);
-                        }
-                        if (preg_match('/string\s+"Position"\s+variant\s+uint32\s+(\d+)/i', $pOut, $posm)) {
-                            $position = (int)round((int)$posm[1] / 1000);
-                        }
-                        if (preg_match('/string\s+"Duration"\s+variant\s+uint32\s+(\d+)/i', $pOut, $durm)) {
-                            $duration = (int)round((int)$durm[1] / 1000);
-                        }
-
-                        $score = 0;
-                        if ($status === 'playing') $score += 10000;
-                        elseif ($status === 'paused') $score += 2000;
-                        if (!empty($title)) $score += 500;
-                        $score += $i * 10;
-
-                        $players[] = [
-                            'path' => $candidate,
-                            'player_num' => $i,
-                            'app_name' => $name ?: 'Bluetooth Player',
-                            'status' => in_array($status, ['playing', 'paused']) ? $status : 'stopped',
-                            'title' => $title,
-                            'artist' => $artist,
-                            'album' => $album,
-                            'position' => $position,
-                            'duration' => $duration ?: 180,
-                            'score' => $score,
-                            'source' => 'dbus-direct'
-                        ];
+            // "object path "/org/bluez/hci0/dev_..." の直近に "Connected" variant boolean true があるものを探す
+            if (preg_match_all('/object path "(\/org\/bluez\/[^\/]+\/dev_[^"]+)"([\s\S]*?)(?=object path|$)/i', $res['stdout'], $matches, PREG_SET_ORDER)) {
+                foreach ($matches as $m) {
+                    $path = $m[1];
+                    $body = $m[2];
+                    if (str_contains($body, 'org.bluez.Device1') && preg_match('/string "Connected"\s+variant\s+boolean\s+true/i', $body)) {
+                        return $path;
                     }
                 }
             }
         }
 
-        // スコアの高い順（再生中のプレイヤー、最新のプレイヤー）にソート
-        usort($players, fn($a, $b) => $b['score'] <=> $a['score']);
+        // 2. bluetoothctl devices から MAC を取得し、Connected == yes のものを探す
+        $devRes = CommandRunner::run("bluetoothctl devices 2>/dev/null");
+        if ($devRes['success'] && !empty($devRes['stdout'])) {
+            $lines = explode("\n", $devRes['stdout']);
+            foreach ($lines as $line) {
+                if (preg_match('/Device\s+([0-9A-Fa-f:]{17})/i', trim($line), $dm)) {
+                    $mac = strtoupper(trim($dm[1]));
+                    $infoRes = CommandRunner::run("bluetoothctl info " . escapeshellarg($mac) . " 2>/dev/null");
+                    if ($infoRes['success'] && str_contains($infoRes['stdout'], 'Connected: yes')) {
+                        $formattedMac = 'dev_' . str_replace(':', '_', $mac);
+                        return "/org/bluez/hci0/{$formattedMac}";
+                    }
+                }
+            }
+        }
 
-        return $players;
+        return null;
     }
 
     /**
-     * 現在アクティブ（再生中、あるいは最新）のメディアプレイヤーを特定する
+     * 現在スマホ側でアクティブになっているMediaPlayer1のオブジェクトパスを取得する
+     * BlueZの MediaControl1.Player プロパティを直接参照するため、
+     * スマホ側で別プレイヤー（Spotify, Apple Music, YouTube等）に切り替えた瞬間、
+     * 即座に新しいプレイヤーパス (player0, player1, player2...) に追従します。
      */
-    public function findActivePlayer(): ?array
+    public function findActivePlayerPath(): ?string
     {
-        $players = $this->getAllMediaPlayers();
-        return !empty($players) ? $players[0] : null;
+        $devPath = $this->getConnectedDevicePath();
+
+        // 1. デバイスの MediaControl1.Player プロパティを問い合わせる (最も正確な正規ルート)
+        if ($devPath) {
+            $cmd = "dbus-send --system --print-reply --dest=org.bluez " 
+                 . escapeshellarg($devPath) 
+                 . " org.freedesktop.DBus.Properties.Get string:org.bluez.MediaControl1 string:Player 2>/dev/null";
+            $res = CommandRunner::run($cmd);
+            if ($res['success'] && preg_match('/variant\s+object path "([^"]+)"/i', $res['stdout'], $m)) {
+                $playerPath = trim($m[1]);
+                if ($playerPath && $playerPath !== '/') {
+                    return $playerPath;
+                }
+            }
+
+            // 2. MediaControl1.Player が取れない場合: devPath 配下の player0 〜 player4 をスキャン
+            //    Status が "playing" のものを最優先で採用
+            $playingPlayer = null;
+            $firstPlayer = null;
+
+            for ($i = 0; $i <= 4; $i++) {
+                $candidate = "{$devPath}/player{$i}";
+                $statusCmd = "dbus-send --system --print-reply --dest=org.bluez " 
+                           . escapeshellarg($candidate) 
+                           . " org.freedesktop.DBus.Properties.Get string:org.bluez.MediaPlayer1 string:Status 2>/dev/null";
+                $sRes = CommandRunner::run($statusCmd);
+                if ($sRes['success']) {
+                    if (!$firstPlayer) {
+                        $firstPlayer = $candidate;
+                    }
+                    if (preg_match('/variant\s+string\s+"playing"/i', $sRes['stdout'])) {
+                        return $candidate; // 再生中が見つかったら即時確定
+                    }
+                }
+            }
+
+            if ($firstPlayer) {
+                return $firstPlayer;
+            }
+        }
+
+        // 3. busctl があれば busctl tree org.bluez から player* を探す
+        if (CommandRunner::hasCommand('busctl')) {
+            $busRes = CommandRunner::run("busctl tree org.bluez 2>/dev/null");
+            if ($busRes['success'] && preg_match_all('/(\/org\/bluez\/[^\s]+\/player\d+)/', $busRes['stdout'], $matches)) {
+                $players = array_unique($matches[1]);
+                // 再生中のものを優先
+                foreach ($players as $p) {
+                    $sRes = CommandRunner::run("dbus-send --system --print-reply --dest=org.bluez " . escapeshellarg($p) . " org.freedesktop.DBus.Properties.Get string:org.bluez.MediaPlayer1 string:Status 2>/dev/null");
+                    if ($sRes['success'] && preg_match('/variant\s+string\s+"playing"/i', $sRes['stdout'])) {
+                        return $p;
+                    }
+                }
+                return end($players) ?: $players[0];
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -189,110 +119,117 @@ class MediaService
      */
     public function getPlayerStatus(): array
     {
-        // 1. D-Bus 経由でアクティブプレイヤーを取得
-        $activePlayer = $this->findActivePlayer();
+        $playerPath = $this->findActivePlayerPath();
 
-        if ($activePlayer && (!empty($activePlayer['title']) || $activePlayer['status'] === 'playing')) {
-            return [
-                'mode' => 'real',
-                'available' => true,
-                'title' => $activePlayer['title'] ?: 'Streaming Audio',
-                'artist' => $activePlayer['artist'] ?: 'Bluetooth Device',
-                'album' => $activePlayer['album'] ?: 'A2DP Sink',
-                'app_name' => $activePlayer['app_name'],
-                'status' => $activePlayer['status'],
-                'position' => $activePlayer['position'],
-                'duration' => $activePlayer['duration'],
-                'codec' => 'A2DP (SBC/AAC)',
-                'player_path' => $activePlayer['path'],
-            ];
+        // 1. D-Bus System Bus (BlueZ MediaPlayer1) から現在のアクティブプレイヤー情報を取得
+        if ($playerPath) {
+            $cmd = "dbus-send --system --print-reply --dest=org.bluez " 
+                 . escapeshellarg($playerPath) 
+                 . " org.freedesktop.DBus.Properties.GetAll string:org.bluez.MediaPlayer1 2>/dev/null";
+            $res = CommandRunner::run($cmd);
+
+            if ($res['success'] && !empty($res['stdout'])) {
+                $out = $res['stdout'];
+
+                $title = '';
+                $artist = '';
+                $album = '';
+                $appName = '';
+                $status = 'stopped';
+                $position = 0;
+                $duration = 0;
+
+                if (preg_match('/string\s+"Status"\s+variant\s+string\s+"([^"]*)"/i', $out, $m)) {
+                    $status = strtolower(trim($m[1]));
+                }
+                if (preg_match('/string\s+"Name"\s+variant\s+string\s+"([^"]*)"/i', $out, $m)) {
+                    $appName = trim($m[1]);
+                }
+                if (preg_match('/string\s+"Title"\s+variant\s+string\s+"([^"]*)"/i', $out, $m)) {
+                    $title = trim($m[1]);
+                }
+                if (preg_match('/string\s+"Artist"\s+variant\s+string\s+"([^"]*)"/i', $out, $m)) {
+                    $artist = trim($m[1]);
+                }
+                if (preg_match('/string\s+"Album"\s+variant\s+string\s+"([^"]*)"/i', $out, $m)) {
+                    $album = trim($m[1]);
+                }
+                if (preg_match('/string\s+"Position"\s+variant\s+uint32\s+(\d+)/i', $out, $m)) {
+                    $position = (int)round((int)$m[1] / 1000);
+                }
+                if (preg_match('/string\s+"Duration"\s+variant\s+uint32\s+(\d+)/i', $out, $m)) {
+                    $duration = (int)round((int)$m[1] / 1000);
+                }
+
+                // 曲名が存在するか、再生中・一時停止中の場合
+                if (!empty($title) || in_array($status, ['playing', 'paused'])) {
+                    return [
+                        'mode' => 'real',
+                        'available' => true,
+                        'title' => $title ?: 'Streaming Audio',
+                        'artist' => $artist ?: ($appName ?: 'Bluetooth Audio'),
+                        'album' => $album ?: '',
+                        'app_name' => $appName ?: 'Music Player',
+                        'status' => in_array($status, ['playing', 'paused']) ? $status : 'paused',
+                        'position' => $position,
+                        'duration' => $duration ?: 180,
+                        'codec' => 'A2DP (AAC/SBC)',
+                        'player_path' => $playerPath,
+                    ];
+                }
+            }
         }
 
         // 2. playerctl 経由 (セッションバス / WirePlumber MPRIS2 が有効な場合)
         if (CommandRunner::hasCommand('playerctl')) {
-            // 利用可能なプレイヤー一覧を取得し、再生中のプレイヤーを優先
-            $listRes = CommandRunner::run("playerctl -l 2>/dev/null");
-            if ($listRes['success'] && !empty($listRes['stdout'])) {
-                $playerNames = explode("\n", trim($listRes['stdout']));
-                $bestPlayer = null;
+            $format = "{{title}}::;::{{artist}}::;::{{album}}::;::{{status}}::;::{{position}}::;::{{mpris:length}}";
+            $res = CommandRunner::run("playerctl metadata --format " . escapeshellarg($format) . " 2>/dev/null");
+            if ($res['success'] && !empty($res['stdout'])) {
+                $parts = explode("::;::", $res['stdout']);
+                $title = $parts[0] ?? '';
+                $artist = $parts[1] ?? '';
+                $album = $parts[2] ?? '';
+                $status = strtolower($parts[3] ?? 'stopped');
+                $position = isset($parts[4]) ? (int)round((float)$parts[4] / 1000000) : 0;
+                $duration = isset($parts[5]) ? (int)round((float)$parts[5] / 1000000) : 0;
 
-                foreach ($playerNames as $pName) {
-                    $pName = trim($pName);
-                    if (!$pName) continue;
-
-                    $statRes = CommandRunner::run("playerctl -p " . escapeshellarg($pName) . " status 2>/dev/null");
-                    $pStatus = strtolower(trim($statRes['stdout'] ?? ''));
-
-                    $format = "{{title}}::;::{{artist}}::;::{{album}}::;::{{status}}::;::{{position}}::;::{{mpris:length}}";
-                    $metaRes = CommandRunner::run("playerctl -p " . escapeshellarg($pName) . " metadata --format " . escapeshellarg($format) . " 2>/dev/null");
-                    
-                    if ($metaRes['success'] && !empty($metaRes['stdout'])) {
-                        $parts = explode("::;::", $metaRes['stdout']);
-                        $title = $parts[0] ?? '';
-                        $artist = $parts[1] ?? '';
-                        $album = $parts[2] ?? '';
-                        $position = isset($parts[4]) ? (int)round((float)$parts[4] / 1000000) : 0;
-                        $duration = isset($parts[5]) ? (int)round((float)$parts[5] / 1000000) : 0;
-
-                        $candidate = [
-                            'mode' => 'real',
-                            'available' => true,
-                            'title' => $title ?: 'Streaming Audio',
-                            'artist' => $artist ?: 'Bluetooth Device',
-                            'album' => $album ?: 'A2DP Sink',
-                            'app_name' => ucfirst(preg_replace('/[^a-zA-Z0-9]/', '', $pName)),
-                            'status' => in_array($pStatus, ['playing', 'paused']) ? $pStatus : 'stopped',
-                            'position' => $position,
-                            'duration' => $duration ?: 180,
-                            'codec' => 'A2DP (playerctl)',
-                        ];
-
-                        if ($pStatus === 'playing') {
-                            return $candidate; // 再生中なら即座に決定
-                        }
-                        if (!$bestPlayer) {
-                            $bestPlayer = $candidate;
-                        }
-                    }
-                }
-
-                if ($bestPlayer) {
-                    return $bestPlayer;
+                if (!empty($title) || in_array($status, ['playing', 'paused'])) {
+                    return [
+                        'mode' => 'real',
+                        'available' => true,
+                        'title' => $title ?: 'Streaming Audio',
+                        'artist' => $artist ?: 'Bluetooth Device',
+                        'album' => $album ?: 'A2DP Sink',
+                        'app_name' => 'MPRIS2',
+                        'status' => in_array($status, ['playing', 'paused']) ? $status : 'stopped',
+                        'position' => $position,
+                        'duration' => $duration ?: 180,
+                        'codec' => 'A2DP (playerctl)',
+                    ];
                 }
             }
         }
 
-        // 3. アクティブプレイヤーはあるが曲名が未通知の場合
-        if ($activePlayer) {
-            return [
-                'mode' => 'real',
-                'available' => true,
-                'title' => 'Streaming Audio',
-                'artist' => $activePlayer['app_name'],
-                'album' => 'A2DP Audio Stream',
-                'app_name' => $activePlayer['app_name'],
-                'status' => $activePlayer['status'],
-                'position' => $activePlayer['position'],
-                'duration' => $activePlayer['duration'],
-                'codec' => 'A2DP (SBC/AAC)',
-                'player_path' => $activePlayer['path'],
-            ];
-        }
-
-        // 4. bluetoothctl info から接続端末を特定
-        $res = CommandRunner::run("bluetoothctl info 2>/dev/null");
-        if ($res['success'] && str_contains($res['stdout'], 'Connected: yes')) {
+        // 3. 接続中のBluetooth端末がある場合
+        $devPath = $this->getConnectedDevicePath();
+        if ($devPath) {
+            // デバイス名を取得
+            $nameCmd = "dbus-send --system --print-reply --dest=org.bluez " 
+                     . escapeshellarg($devPath) 
+                     . " org.freedesktop.DBus.Properties.Get string:org.bluez.Device1 string:Name 2>/dev/null";
+            $nRes = CommandRunner::run($nameCmd);
             $deviceName = 'Connected Smartphone';
-            if (preg_match('/Name:\s*(.+)$/m', $res['stdout'], $m)) {
-                $deviceName = trim($m[1]);
+            if ($nRes['success'] && preg_match('/variant\s+string\s+"([^"]+)"/i', $nRes['stdout'], $nm)) {
+                $deviceName = trim($nm[1]);
             }
+
             return [
                 'mode' => 'real',
                 'available' => true,
-                'title' => 'Bluetooth Audio Connected',
+                'title' => 'Ready to Play',
                 'artist' => $deviceName,
-                'album' => 'Open music app on phone to play',
-                'app_name' => 'Smartphone',
+                'album' => 'Play audio on smartphone',
+                'app_name' => '',
                 'status' => 'paused',
                 'position' => 0,
                 'duration' => 0,
@@ -316,15 +253,14 @@ class MediaService
 
     /**
      * AVRCP コントロールコマンドを実行
-     * 現在再生中、または最新のアクティブプレイヤーを対象にして操作する
+     * 現在アクティブなプレイヤー（MediaControl1.Player）に対して的確に送信
      */
     public function control(string $action): array
     {
-        $activePlayer = $this->findActivePlayer();
-        $playerPath = $activePlayer['path'] ?? null;
+        $playerPath = $this->findActivePlayerPath();
         $errors = [];
 
-        // 1. D-Bus System Bus 経由で実行 (BlueZ MediaPlayer1)
+        // 1. D-Bus System Bus (BlueZ MediaPlayer1) で実行
         if ($playerPath) {
             $method = match ($action) {
                 'play' => 'Play',
@@ -337,8 +273,8 @@ class MediaService
             };
 
             if ($action === 'play-pause' || $action === 'toggle') {
-                $currentStatus = $activePlayer['status'] ?? 'stopped';
-                $method = ($currentStatus === 'playing') ? 'Pause' : 'Play';
+                $statusInfo = $this->getPlayerStatus();
+                $method = ($statusInfo['status'] === 'playing') ? 'Pause' : 'Play';
             }
 
             if ($method) {
@@ -353,7 +289,6 @@ class MediaService
                         'action' => $action,
                         'method' => $method,
                         'player_path' => $playerPath,
-                        'app_name' => $activePlayer['app_name'] ?? '',
                         'via' => 'dbus-system-bus',
                         'output' => $res['stdout']
                     ];
@@ -388,7 +323,7 @@ class MediaService
             $errors[] = "bluetoothctl pipe: " . $res['stdout'];
         }
 
-        // 3. playerctl CLI (フォールバック 2: Session Bus がある場合)
+        // 3. playerctl (フォールバック 2)
         if (CommandRunner::hasCommand('playerctl')) {
             $pAction = match ($action) {
                 'play' => 'play',
