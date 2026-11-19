@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  mediablue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mediablue-app
+    restart: unless-stopped
+    # ホストのBluetoothスタックおよびネットワークと直結するために host ネットワークを推奨
+    network_mode: 'host'
+    # Bluetoothアダプタの操作やD-Bus通信のための権限
+    privileged: true
+    environment:
+      - MOCK_MODE=false
+      - PULSE_SERVER=unix:/run/user/1000/pulse/native
+      # PipeWireの場合: unix:/run/user/1000/pipewire-0 も利用可能
+    volumes:
+      # ホストのD-Busシステムソケット（BlueZ / bluetoothctl の通信に必須）
+      - /var/run/dbus:/var/run/dbus:ro
+      # ホストのPulseAudio / PipeWire-pulse ソケット（オーディオ再生・HFPマイク入力に必須）
+      - /run/user/1000/pulse:/run/user/1000/pulse:ro
+      # PipeWireネイティブソケット（PipeWire環境の場合）
+      - /run/user/1000/pipewire-0:/run/user/1000/pipewire-0:ro
+      # PulseAudioのクッキー（認証が必要な場合）
+      - /home/user/.config/pulse/cookie:/root/.config/pulse/cookie:ro
+      # ソースコードをマウントして開発・ホットリロードしたい場合（任意）
+      - ./public:/var/www/html/public
+      - ./src:/var/www/html/src

@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  mediablue-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mediablue
+    restart: unless-stopped
+    ports:
+      - '12080:12080'
+    environment:
+      - MOCK_MODE=true
+    volumes:
+      - ./public:/var/www/html/public
+      - ./src:/var/www/html/src
