@@ -1,8 +1,9 @@
-const CACHE_NAME = 'enoki-a2dp-v2.0.1'
+const CACHE_NAME = 'mediablue-v2.1.0'
 
 const PRECACHE_ASSETS = [
   '/',
   '/index.php',
+  '/guide.php',
   '/manifest.json',
   '/css/style.css',
   '/js/i18n.js',

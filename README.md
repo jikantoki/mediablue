@@ -21,10 +21,14 @@ Ubuntu、BlueZ、Audioctl (PipeWire / WirePlumber / PulseAudio) との連携を�
   - タッチ対応テンキーダイヤラーによる発信
   - 通話時間タイマー、マイクミュート、終話コントロール
   - スマートフォンのバッテリー残量および電波強度（アンテナピクト）のリアルタイム表示
-- **📶 BlueZ Bluetooth 管理**
+- **📶 BlueZ Bluetooth 管理 & 電源監視**
   - Bluetoothアダプタの電源（Power）および検出可能（Discoverable）モードの切替
+  - **ホストのBluetooth電源（Power）状態を自動監視**: オフ時は専用アラート画面を表示し、画面上の「📶 Bluetoothをオンにする」ボタンからワンタップで即時復帰
   - 周辺デバイスのリアルタイムスキャン & ワンクリックペアリング / 信頼（Trust）設定
   - プロファイル状態の可視化（A2DP Source, AVRCP, HFP-AG）
+- **📖 充実した導入解説ガイド (Guide)**
+  - LinuxホストにおけるA2DP Sink / HFP プロファイルの有効化手順、PipeWire/WirePlumber/BlueZ設定、Docker導入をアプリ内タブおよびWebページで完全網羅
+  - 詳細ドキュメント: [`docs/SETUP_GUIDE.md`](./docs/SETUP_GUIDE.md) または ブラウザから `http://<ホストIP>:12080/guide.php`
 - **🎚️ Audioctl & オーディオミキサー (PipeWire / PulseAudio)**
   - マスター音量調整およびミュート
   - 出力デバイス（HDMI、3.5mmジャック、USB DACなど）の動的切替
@@ -89,6 +93,8 @@ Ubuntu、BlueZ、Audioctl (PipeWire / WirePlumber / PulseAudio) との連携を�
 ---
 
 ## ⚙️ ホストOS（Ubuntu）の事前設定
+
+> 📘 **より詳しいステップバイステップ導入手順は [docs/SETUP_GUIDE.md](./docs/SETUP_GUIDE.md) または起動後にブラウザから `http://<ホストIP>:12080/guide.php` をご覧ください。**
 
 ### 1. 必要なパッケージのインストール
 
@@ -188,24 +194,23 @@ docker compose -f docker-compose.dev.yml up -d --build
 - 画面中央のボタンで **再生 / 一時停止 / スキップ** のAVRCP制御が可能です。
 - 再生中はビニールレコードが回転し、下部のシークバーが進みます。
 
-### 2. ハンズフリー電話 (Hands-Free Phone)
+### 2. Bluetooth 電源監視 & オフ時アラート画面
 
-- **待機中**: 接続中のスマートフォンのキャリア名、バッテリー残量、電波状況が表示されます。
-- **着信時**: 画面全体に着信モーダルが表示され、発信者名と番号を確認して「Answer (応答)」または「Decline (拒否)」を選択できます。
-- **通話中**: 通話時間カウンターが作動し、マイクミュートや終話ボタンが利用できます。
-- **発信**: 右側のタッチテンキーで電話番号を入力し、緑色の発信ボタンで通話を開始できます。
+- **ホストのBluetooth電源を自動監視**: アダプタがオフになると、画面上に専用の警告オーバーレイが自動表示されます。
+- **ワンクリック電源オン**: 警告画面の「📶 Bluetoothをオンにする」ボタンを押すことで、アプリ側から即時復帰を試行します。
+- **手動コマンド案内**: ホストのSSH/CLIで実行すべきコマンド（`rfkill` や `bluetoothctl`）の案内とコピー機能も搭載しています。
 
-### 3. Bluetooth 設定 (Bluetooth Manager)
+### 3. 導入手順・解説ガイド (Guide)
 
-- **Power / Discoverable**: スイッチをONにすることで、スマートフォン側のBluetooth設定画面から本機（`Ubuntu mediablue`）が検出できるようになります。
-- **Scan for Devices**: 周辺のBluetoothデバイスを検索します。
-- **Pair & Trust**: 検出されたデバイスをワンクリックでペアリング・自動信頼します。
-- **Connect / Disconnect**: A2DPおよびHFPプロファイルを接続・切断します。
+- アプリ内の **「Guide」ナビゲーションタブ** から、いつでもLinuxホスト側のBlueZやPipeWire/WirePlumber設定、Docker起動手順をグラフィカルに確認できます。
+- 単独のWebページとしても `http://<ホストIP>:12080/guide.php` から閲覧可能です。
 
-### 4. オーディオミキサー (Audio Mixer)
+### 4. システム設定 & 診断 (Settings)
 
-- **Master Volume**: 車載スピーカーの全体音量をスライダーで直感的に調整できます。
-- **Output Devices (Sinks)**: PulseAudio / PipeWire で検出された出力先（内蔵スピーカー、USB DAC、HDMI等）をワンタップで切り替え可能です。
+- 言語切り替え（日本語 / 英語）
+- 実機ホストモードとシミュレーションモードの切り替え
+- シミュレーション時のBluetooth電源On/Offテスト機能
+- D-Bus、PulseAudio、BlueZ MediaPlayer1 の接続状態診断テーブル
 
 ### 5. PWA (ネイティブ風スタンドアロンアプリ) としてのインストール
 

@@ -30,10 +30,10 @@ const App = {
       this.pollFast()
     }, 1000)
 
-    // 5. 5秒ごとにBluetooth接続状態更新
+    // 5. 3秒ごとにBluetooth電源 & 接続状態更新
     setInterval(() => {
       if (typeof Bluetooth !== 'undefined') Bluetooth.loadStatus()
-    }, 5000)
+    }, 3000)
   },
 
   initTabs() {

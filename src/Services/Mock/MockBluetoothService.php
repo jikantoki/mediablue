@@ -101,10 +101,13 @@ class MockBluetoothService implements BluetoothInterface
     {
         $data = $this->getMockData();
         $connected = array_filter($data['devices'], fn($d) => $d['connected']);
+        $adapter = $data['adapter'];
+        $adapter['has_controller'] = true;
+        $adapter['error'] = empty($adapter['powered']) ? 'Bluetooth adapter is powered off.' : null;
 
         return [
             'mode' => 'mock',
-            'adapter' => $data['adapter'],
+            'adapter' => $adapter,
             'connected_count' => count($connected),
             'devices' => $data['devices'],
         ];

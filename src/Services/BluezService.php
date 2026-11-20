@@ -17,6 +17,7 @@ class BluezService implements BluetoothInterface
         $discovering = false;
         $name = 'Ubuntu mediablue';
         $mac = '00:00:00:00:00:00';
+        $hasController = false;
 
         if ($res['success']) {
             $lines = explode("\n", $res['stdout']);
@@ -24,6 +25,7 @@ class BluezService implements BluetoothInterface
                 $line = trim($line);
                 if (preg_match('/^Controller\s+([0-9A-Fa-f:]+)\s*(.*)$/', $line, $m)) {
                     $mac = $m[1];
+                    $hasController = true;
                 } elseif (preg_match('/^Name:\s*(.*)$/', $line, $m)) {
                     $name = $m[1];
                 } elseif (preg_match('/^Powered:\s*(yes|no)/i', $line, $m)) {
@@ -46,10 +48,12 @@ class BluezService implements BluetoothInterface
             'adapter' => [
                 'name' => $name,
                 'mac' => $mac,
+                'has_controller' => $hasController,
                 'powered' => $powered,
                 'discoverable' => $discoverable,
                 'pairable' => $pairable,
                 'discovering' => $discovering,
+                'error' => (!$hasController) ? 'No Bluetooth controller detected. Check USB dongle or rfkill.' : (!$powered ? 'Bluetooth adapter is powered off.' : null),
             ],
             'connected_count' => count($connectedDevices),
             'devices' => array_values($devices),
@@ -230,7 +234,14 @@ class BluezService implements BluetoothInterface
     public function setPower(bool $power): bool
     {
         $val = $power ? 'on' : 'off';
-        $res = CommandRunner::run("bluetoothctl power {$val}");
+        if ($power) {
+            CommandRunner::run("rfkill unblock bluetooth 2>/dev/null");
+        }
+        $res = CommandRunner::run("bluetoothctl power {$val}", 5);
+        $output = strtolower($res['stdout'] . ' ' . $res['stderr']);
+        if (str_contains($output, 'failed') || str_contains($output, 'not available')) {
+            return false;
+        }
         return $res['success'];
     }
 }

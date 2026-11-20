@@ -14,10 +14,30 @@ const I18N_DATA = {
     // Navigation
     nav_media: 'Media',
     nav_media_title: 'メディアプレーヤー (A2DP)',
+    nav_guide: 'Guide',
+    nav_guide_title: '導入手順・解説ガイド',
     nav_settings: 'Settings',
     nav_settings_title: 'システム設定',
     nav_about: 'About',
     nav_about_title: 'アプリ情報・開発元',
+
+    // Bluetooth Off Modal & Status
+    bt_off_title: 'Bluetoothがオフになっています',
+    bt_off_desc: '高音質オーディオ（A2DP Sink）を受信するには、ホスト端末のBluetoothをオンにする必要があります。',
+    bt_off_btn_on: '📶 Bluetoothをオンにする',
+    bt_off_turning_on: '起動中...',
+    bt_off_btn_guide: '📖 導入手順ガイドを見る',
+    bt_off_manual_toggle: '💡 ホスト端末の手動有効化コマンド (CLI)',
+    bt_off_manual_desc: 'Linuxホスト端末上で直接オンにする場合は以下を実行してください：',
+    bt_off_btn_copy: '📋 コマンドをコピー',
+    bt_off_copied: 'コピーしました！',
+    bt_off_dismiss: '閉じる（UIの確認のみ）',
+    bt_off_missing: '⚠️ Bluetoothアダプタが見つかりません。USB Bluetoothドングルの接続等をご確認ください。',
+    toast_bt_on_success: 'Bluetoothをオンにしました',
+    toast_bt_on_failed: 'Bluetoothをオンにできませんでした。ホスト端末のサービス状態をご確認ください。',
+    setting_bt_power_test: 'Bluetooth電源テスト (Power On/Off)',
+    setting_bt_power_test_desc: 'Bluetoothのオン/オフを切り替えて警告画面の動作をテストできます',
+    guide_heading: 'Linux A2DP Sink / HFP 導入解説ガイド',
 
     // Status bar
     mode_mock: 'シミュレーションモード',
@@ -133,10 +153,30 @@ const I18N_DATA = {
     // Navigation
     nav_media: 'Media',
     nav_media_title: 'Media Player (A2DP)',
+    nav_guide: 'Guide',
+    nav_guide_title: 'Setup & Configuration Guide',
     nav_settings: 'Settings',
     nav_settings_title: 'System Settings',
     nav_about: 'About',
     nav_about_title: 'About & Developer',
+
+    // Bluetooth Off Modal & Status
+    bt_off_title: 'Bluetooth is Turned Off',
+    bt_off_desc: 'To stream audio (A2DP Sink), you need to turn on Bluetooth on the host device.',
+    bt_off_btn_on: '📶 Turn On Bluetooth',
+    bt_off_turning_on: 'Turning on...',
+    bt_off_btn_guide: '📖 View Setup Guide',
+    bt_off_manual_toggle: '💡 Host Terminal CLI Commands',
+    bt_off_manual_desc: 'To turn it on manually on the Linux host terminal, run:',
+    bt_off_btn_copy: '📋 Copy Command',
+    bt_off_copied: 'Copied!',
+    bt_off_dismiss: 'Dismiss (View UI only)',
+    bt_off_missing: '⚠️ No Bluetooth adapter detected. Please check USB dongle connection.',
+    toast_bt_on_success: 'Bluetooth turned on successfully',
+    toast_bt_on_failed: 'Failed to turn on Bluetooth. Please check host service status.',
+    setting_bt_power_test: 'Bluetooth Power Test (Power On/Off)',
+    setting_bt_power_test_desc: 'Toggle Bluetooth power to test the warning overlay screen',
+    guide_heading: 'Linux A2DP Sink / HFP Setup & Configuration Guide',
 
     // Status bar
     mode_mock: 'SIMULATION MODE',

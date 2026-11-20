@@ -51,6 +51,11 @@ class App
             return;
         }
 
+        if ($uri === '/guide' || $uri === '/guide.php') {
+            require __DIR__ . '/../public/guide.php';
+            return;
+        }
+
         // 静的アセット配信チェック (CLIサーバー等での実行用)
         $publicFile = __DIR__ . '/../public' . $uri;
         if (file_exists($publicFile) && !is_dir($publicFile)) {

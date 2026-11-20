@@ -11,11 +11,21 @@ if (str_starts_with($uri, '/api/')) {
     exit;
 }
 
+// 導入解説ガイドへのアクセスの場合はguide.phpを実行
+if ($uri === '/guide' || $uri === '/guide.php') {
+    require __DIR__ . '/guide.php';
+    exit;
+}
+
 // 静的ファイル（manifest.json, sw.js, assets等）へのアクセスの場合は適切なContent-Typeで配信
 if ($uri !== '/' && $uri !== '/index.php') {
     $staticFile = __DIR__ . $uri;
     if (file_exists($staticFile) && !is_dir($staticFile)) {
         $ext = pathinfo($staticFile, PATHINFO_EXTENSION);
+        if ($ext === 'php') {
+            require $staticFile;
+            exit;
+        }
         $mimes = [
             'json' => 'application/json; charset=utf-8',
             'js'   => 'application/javascript; charset=utf-8',
@@ -55,7 +65,7 @@ $isMock = \mediablue\Config::isMockMode();
     <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
     <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
 
-    <link rel="stylesheet" href="/css/style.css?v=2.0.1">
+    <link rel="stylesheet" href="/css/style.css?v=2.1.0">
 </head>
 <body class="dark-theme">
     <div id="app" class="car-container">
@@ -95,7 +105,7 @@ $isMock = \mediablue\Config::isMockMode();
 
         <!-- Main Body: Navigation Rail + Content Area -->
         <div class="main-layout">
-            <!-- Automotive Sidebar Navigation (Media, Settings, About ONLY) -->
+            <!-- Automotive Sidebar Navigation (Media, Guide, Settings, About) -->
             <nav class="side-nav">
                 <button class="nav-btn active" data-tab="tab-player" title="メディアプレーヤー (A2DP)" data-i18n-title="nav_media_title">
                     <svg class="icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
@@ -104,6 +114,15 @@ $isMock = \mediablue\Config::isMockMode();
                         <circle cx="18" cy="16" r="3"/>
                     </svg>
                     <span data-i18n="nav_media">Media</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-guide" title="導入手順・解説ガイド" data-i18n-title="nav_guide_title">
+                    <svg class="icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        <line x1="9" y1="7" x2="16" y2="7"/>
+                        <line x1="9" y1="11" x2="14" y2="11"/>
+                    </svg>
+                    <span data-i18n="nav_guide">Guide</span>
                 </button>
                 <button class="nav-btn" data-tab="tab-settings" title="システム設定" data-i18n-title="nav_settings_title">
                     <svg class="icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
@@ -210,7 +229,12 @@ $isMock = \mediablue\Config::isMockMode();
                     </div>
                 </section>
 
-                <!-- 2. Settings Tab -->
+                <!-- 2. Guide Tab (A2DP / HFP Setup Guide) -->
+                <section id="tab-guide" class="tab-panel">
+                    <?php include __DIR__ . '/../src/Views/guide_content.php'; ?>
+                </section>
+
+                <!-- 3. Settings Tab -->
                 <section id="tab-settings" class="tab-panel">
                     <div class="settings-layout">
                         <!-- Language Settings -->
@@ -249,6 +273,17 @@ $isMock = \mediablue\Config::isMockMode();
                                 </div>
                                 <div class="sim-actions">
                                     <button id="btn-reset-mock" class="btn-action btn-secondary" data-i18n="btn_reset_mock">🔄 状態をリセット</button>
+                                </div>
+                            </div>
+
+                            <div class="settings-row simulation-tools <?= $isMock ? '' : 'hidden' ?>" id="sim-bt-power-row">
+                                <div>
+                                    <strong data-i18n="setting_bt_power_test">Bluetooth電源テスト (Power On/Off)</strong>
+                                    <p class="subtext" data-i18n="setting_bt_power_test_desc">Bluetoothのオン/オフを切り替えて警告画面の動作をテストできます</p>
+                                </div>
+                                <div class="sim-actions">
+                                    <button id="btn-test-bt-off" class="btn-action btn-secondary" style="border-color: rgba(239, 68, 68, 0.4); color: var(--color-red);">⚡ OFF (テスト)</button>
+                                    <button id="btn-test-bt-on" class="btn-action" style="border-color: rgba(16, 185, 129, 0.4); color: var(--color-green);">📶 ON</button>
                                 </div>
                             </div>
                         </div>
@@ -403,14 +438,68 @@ $isMock = \mediablue\Config::isMockMode();
             </main>
         </div>
 
+        <!-- Bluetooth Off Alert Modal -->
+        <div id="modal-bt-off" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="bt-off-title">
+            <div class="card bt-off-box">
+                <div class="bt-off-icon-circle">
+                    <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m7 7 10 10-5 5V2l5 5L7 17"/>
+                        <line x1="2" y1="2" x2="22" y2="22" stroke="var(--color-red)" stroke-width="2.5"/>
+                    </svg>
+                </div>
+                <h2 id="bt-off-title" class="bt-off-title" data-i18n="bt_off_title">Bluetoothがオフになっています</h2>
+                <p id="bt-off-desc" class="bt-off-desc" data-i18n="bt_off_desc">
+                    高音質オーディオ（A2DP Sink）を受信するには、ホスト端末のBluetoothをオンにする必要があります。
+                </p>
+                <div id="bt-off-missing-warning" class="bt-off-warning-box hidden">
+                    <span data-i18n="bt_off_missing">⚠️ Bluetoothアダプタが見つかりません。USB Bluetoothドングルの接続等をご確認ください。</span>
+                </div>
+
+                <div class="bt-off-actions">
+                    <button id="btn-turn-on-bt" class="btn-turn-on-bt">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m7 7 10 10-5 5V2l5 5L7 17"/>
+                        </svg>
+                        <span id="btn-turn-on-bt-text" data-i18n="bt_off_btn_on">📶 Bluetoothをオンにする</span>
+                    </button>
+                    <button id="btn-goto-guide" class="btn-action btn-secondary btn-guide-link">
+                        <span data-i18n="bt_off_btn_guide">📖 導入手順ガイドを見る</span>
+                    </button>
+                </div>
+
+                <!-- Host CLI Instructions Accordion -->
+                <div class="bt-manual-section">
+                    <button id="btn-toggle-bt-manual" class="btn-manual-toggle" type="button">
+                        <span data-i18n="bt_off_manual_toggle">💡 ホスト端末の手動有効化コマンド (CLI)</span>
+                        <svg class="chevron-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="bt-manual-content" class="bt-manual-content hidden">
+                        <p class="bt-manual-sub" data-i18n="bt_off_manual_desc">Linuxホスト端末上で直接オンにする場合は以下を実行してください：</p>
+                        <div class="code-copy-container">
+                            <pre><code id="bt-cli-command">sudo rfkill unblock bluetooth && bluetoothctl power on</code></pre>
+                            <button id="btn-copy-bt-cli" class="btn-copy-icon" title="コマンドをコピー" data-i18n-title="bt_off_btn_copy">
+                                📋
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bt-off-footer">
+                    <button id="btn-dismiss-bt-off" class="btn-text-link" data-i18n="bt_off_dismiss">閉じる（UIの確認のみ）</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Notification Toast -->
         <div id="toast" class="toast hidden"></div>
     </div>
 
     <!-- Scripts -->
-    <script src="/js/i18n.js?v=2.0.1"></script>
-    <script src="/js/app.js?v=2.0.1"></script>
-    <script src="/js/player.js?v=2.0.1"></script>
-    <script src="/js/bluetooth.js?v=2.0.1"></script>
+    <script src="/js/i18n.js?v=2.1.0"></script>
+    <script src="/js/app.js?v=2.1.0"></script>
+    <script src="/js/player.js?v=2.1.0"></script>
+    <script src="/js/bluetooth.js?v=2.1.0"></script>
 </body>
 </html>

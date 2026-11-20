@@ -133,6 +133,17 @@ class BluetoothController
         $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
         $power = isset($input['power']) ? (bool)$input['power'] : true;
         $res = $this->btService->setPower($power);
-        Response::success(['powered' => $power]);
+        if ($res) {
+            Response::success(
+                ['powered' => $power],
+                $power ? 'Bluetooth turned on successfully' : 'Bluetooth turned off'
+            );
+        } else {
+            Response::error(
+                $power ? 'Failed to turn on Bluetooth. Please check host bluetoothd service or rfkill.' : 'Failed to turn off Bluetooth',
+                500,
+                ['powered' => false]
+            );
+        }
     }
 }
