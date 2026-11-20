@@ -1,4 +1,4 @@
-const CACHE_NAME = 'enoki-a2dp-v2.0.0'
+const CACHE_NAME = 'enoki-a2dp-v2.0.1'
 
 const PRECACHE_ASSETS = [
   '/',

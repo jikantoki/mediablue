@@ -472,6 +472,11 @@ body {
   box-shadow: 0 4px 20px rgba(0, 210, 255, 0.4);
 }
 
+.ctrl-play #icon-play {
+  /* 三角形アイコンの視覚的重心（光学中心）を円の中央に補正 */
+  margin-left: 3px;
+}
+
 .ctrl-play:hover {
   background: var(--color-accent-hover);
   color: #0c0f14;

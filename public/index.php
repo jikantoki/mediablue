@@ -55,7 +55,7 @@ $isMock = \mediablue\Config::isMockMode();
     <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
     <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png">
 
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css?v=2.0.1">
 </head>
 <body class="dark-theme">
     <div id="app" class="car-container">
@@ -408,9 +408,9 @@ $isMock = \mediablue\Config::isMockMode();
     </div>
 
     <!-- Scripts -->
-    <script src="/js/i18n.js"></script>
-    <script src="/js/app.js"></script>
-    <script src="/js/player.js"></script>
-    <script src="/js/bluetooth.js"></script>
+    <script src="/js/i18n.js?v=2.0.1"></script>
+    <script src="/js/app.js?v=2.0.1"></script>
+    <script src="/js/player.js?v=2.0.1"></script>
+    <script src="/js/bluetooth.js?v=2.0.1"></script>
 </body>
 </html>
