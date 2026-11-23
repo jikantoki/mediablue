@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Mediablue ネイティブ版 (Tauri / WebKitGTK) の .deb をビルドするスクリプト
-# 使い方: ./scripts/build-deb.sh
-# 出力先: src-tauri/target/release/bundle/deb/Mediablue_<version>_<arch>.deb
+# 使い方: bash scripts/build-deb.sh
+# 出力先: dist/mediablue.deb (バージョンに関係なく毎回同じファイル名で上書き)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -37,6 +37,11 @@ fi
 echo "[3/3] .deb をビルドします"
 "${TAURI[@]}" build --bundles deb
 
+# Tauri の出力 (Mediablue_<version>_<arch>.deb) のうち最新のものを固定名でコピー
+BUILT=$(ls -1t src-tauri/target/release/bundle/deb/*.deb | head -n 1)
+mkdir -p dist
+cp -f "$BUILT" dist/mediablue.deb
+
 echo
-echo "完成: $(ls -1 src-tauri/target/release/bundle/deb/*.deb)"
-echo "インストール: sudo apt install ./$(ls -1 src-tauri/target/release/bundle/deb/*.deb)"
+echo "完成: dist/mediablue.deb  (元ファイル: $BUILT)"
+echo "インストール: sudo apt install ./dist/mediablue.deb"

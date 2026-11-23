@@ -4,4 +4,4 @@
 *.md
 src-tauri
 scripts
-release
+dist

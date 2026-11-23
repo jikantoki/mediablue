@@ -266,7 +266,7 @@ Docker を使わず、Ubuntu のアプリとしてインストールして使え
 ### インストール
 
 ```bash
-sudo apt install ./Mediablue_2.1.0_amd64.deb
+sudo apt install ./dist/mediablue.deb
 ```
 
 `apt` で入れると、次の依存パッケージも自動でインストールされます。
@@ -299,7 +299,7 @@ Docker 版との違い:
 
 ```bash
 bash scripts/build-deb.sh
-# → src-tauri/target/release/bundle/deb/Mediablue_<version>_amd64.deb
+# → dist/mediablue.deb（毎回同じファイル名で上書きされます）
 ```
 
 ARM 機（Raspberry Pi など）向けの .deb は、その ARM 機上でビルドしてください。
