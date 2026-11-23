@@ -258,6 +258,54 @@ docker compose -f docker-compose.dev.yml up -d --build
 
 ---
 
+## 🖥️ ネイティブアプリ版（.deb / Tauri + WebKitGTK）
+
+Docker を使わず、Ubuntu のアプリとしてインストールして使える版です。
+アプリを起動すると内部で PHP の組み込みサーバー（`127.0.0.1:12180`）が立ち上がり、その画面を専用ウィンドウ（WebKitGTK）で表示します。ウィンドウを閉じると PHP サーバーも自動で停止します。
+
+### インストール
+
+```bash
+sudo apt install ./Mediablue_2.1.0_amd64.deb
+```
+
+`apt` で入れると、次の依存パッケージも自動でインストールされます。
+
+- 必須: `libwebkit2gtk-4.1-0`（WebKitGTK）, `libgtk-3-0`, `php-cli`, `bluez`, `dbus`, `pulseaudio-utils`, `playerctl`
+- 推奨: `pipewire-pulse`, `wireplumber`, `libspa-0.2-bluetooth`, `bluez-tools`
+
+> ⚠️ `dpkg -i` ではなく `apt install ./ファイル名.deb` を使ってください（`dpkg` は依存パッケージを自動で入れません）。
+
+インストール後はアプリ一覧の「Mediablue」から起動できます。端末からは `mediablue` で起動します。
+
+### 起動オプション
+
+| 指定方法 | 内容 |
+|---|---|
+| `mediablue --fullscreen`（または `MEDIABLUE_FULLSCREEN=1`） | 全画面で起動（車載ディスプレイ向け） |
+| `MEDIABLUE_PORT=12345` | PHP サーバーのポートを変更（既定: 12180。使用中なら空きポートを自動選択） |
+| `MEDIABLUE_DEBUG=1` | PHP サーバーのログを端末に表示 |
+| `MEDIABLUE_PHP=/path/to/php` | 使用する PHP 実行ファイルを指定 |
+
+Docker 版との違い:
+
+- 実行ユーザーの権限で動くため、`privileged` や root 実行、`/run/user/1000` の決め打ちは不要です（`PULSE_SERVER` は `XDG_RUNTIME_DIR` から自動で決まります）。
+- Bluetooth を操作するには、ユーザーが `bluetooth` グループに入っている必要がある場合があります（`sudo usermod -aG audio,bluetooth $USER`）。
+- PWA 用の Service Worker はネイティブ版では無効です。
+
+### ビルド方法
+
+ビルドする Ubuntu と同じか、それより新しい Ubuntu でのみ動きます（Ubuntu 24.04 でビルドした .deb は 22.04 では動きません）。
+
+```bash
+bash scripts/build-deb.sh
+# → src-tauri/target/release/bundle/deb/Mediablue_<version>_amd64.deb
+```
+
+ARM 機（Raspberry Pi など）向けの .deb は、その ARM 機上でビルドしてください。
+
+---
+
 ## 🛠️ トラブルシューティング
 
 ### Q1. スマホのBluetooth設定画面に本機が表示されない

@@ -1,0 +1,11 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "default",
+    "description": "\u30ed\u30fc\u30ab\u30eb\u753b\u9762\u306e\u307f\u3002PHP\u30d0\u30c3\u30af\u30a8\u30f3\u30c9\u306e\u753b\u9762\u306b\u306fIPC\u6a29\u9650\u3092\u4e0e\u3048\u306a\u3044",
+    "windows": [
+        "main"
+    ],
+    "permissions": [
+        "core:default"
+    ]
+}

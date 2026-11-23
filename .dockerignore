@@ -2,3 +2,6 @@
 .gitignore
 .dockerignore
 *.md
+src-tauri
+scripts
+release

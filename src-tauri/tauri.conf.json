@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Mediablue",
+  "version": "2.1.0",
+  "identifier": "com.jikantoki.mediablue",
+  "build": {
+    "frontendDist": "dist"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb"],
+    "category": "Music",
+    "shortDescription": "A2DP Sink & HFP car media client",
+    "longDescription": "Bluetooth A2DP Sink / AVRCP / HFP に対応した車載向けメディア・ハンズフリー通話アプリ。BlueZ と PipeWire / PulseAudio を操作します。",
+    "publisher": "jikantoki",
+    "homepage": "https://github.com/jikantoki/mediablue",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png"
+    ],
+    "resources": {
+      "../public/": "web/public/",
+      "../src/": "web/src/"
+    },
+    "linux": {
+      "deb": {
+        "section": "sound",
+        "priority": "optional",
+        "depends": [
+          "php-cli",
+          "bluez",
+          "dbus",
+          "pulseaudio-utils",
+          "playerctl"
+        ],
+        "recommends": [
+          "pipewire-pulse",
+          "wireplumber",
+          "libspa-0.2-bluetooth",
+          "bluez-tools"
+        ]
+      }
+    }
+  }
+}
